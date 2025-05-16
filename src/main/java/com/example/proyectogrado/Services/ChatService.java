@@ -1,0 +1,82 @@
+package com.example.proyectogrado.Services;
+
+import com.example.proyectogrado.Models.ChatMessage;
+import com.example.proyectogrado.Models.Prompt;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class ChatService {
+
+    private final WebClient webClient;
+    private final List<ChatMessage> conversationHistory = new ArrayList<>();
+    private final Prompt prompt = new Prompt();
+    @Value("${gemini.api.url}")
+    private String API_URL;
+    @Value("${gemini.api.key}")
+    private String API_KEY;
+
+    private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    public ChatService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl(API_URL).build();
+    }
+
+    //Envía el mensaje al modelo de IA y devuelve la respuesta
+    public Mono<String> sendMessage() {
+        // Agregar mensaje del usuario al historial
+        ChatMessage.Part part = new ChatMessage.Part();
+        part.setText(prompt.getPrompt());
+
+        // Crear el mensaje del usuario
+        ChatMessage userChatMessage = new ChatMessage();
+        userChatMessage.setRole("user");
+        userChatMessage.setParts(List.of(part));
+
+        // Agregar el mensaje del usuario al historial
+        conversationHistory.add(userChatMessage);
+        Map<String, Object> requestBody = Map.of("contents", conversationHistory);
+        try {
+            String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+            return webClient.post()
+                    .uri("/gemini-2.0-flash:generateContent?key=" + API_KEY)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestBodyJson)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::extractMessage);
+        } catch (Exception e) {
+            return Mono.error(new RuntimeException("Error al generar el JSON del request", e));
+        }
+    }
+
+    //Extrae el mensaje de la respuesta del modelo de IA
+    private String extractMessage(String response) {
+        try {
+            JsonNode rootNode = objectMapper.readTree(response);
+            JsonNode candidates = rootNode.path("candidates");
+            if (candidates.isArray() && !candidates.isEmpty()) {
+                JsonNode firstCandidate = candidates.get(0);
+                JsonNode content = firstCandidate.path("content");
+                JsonNode parts = content.path("parts");
+                if (parts.isArray() && !parts.isEmpty()) {
+                    return parts.get(0).path("text").asText();
+                }
+            }
+            return "No se pudo extraer la respuesta del modelo.";
+        } catch (Exception e) {
+            return "Error al procesar la respuesta del modelo: " + e.getMessage();
+        }
+    }
+
+}
