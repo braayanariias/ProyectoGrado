@@ -20,7 +20,6 @@ public class ChatService {
     private final WebClient webClient;
     private final List<ChatMessage> conversationHistory = new ArrayList<>();
     private final Prompt prompt = new Prompt();
-    private final String API_URL;
     private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
@@ -29,7 +28,6 @@ public class ChatService {
             @Value("${gemini.api.url}") String apiUrl,
             @Value("${gemini.api.key}") String apiKey
     ) {
-        this.API_URL = apiUrl;
         this.API_KEY = apiKey;
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
     }
