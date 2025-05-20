@@ -20,15 +20,18 @@ public class ChatService {
     private final WebClient webClient;
     private final List<ChatMessage> conversationHistory = new ArrayList<>();
     private final Prompt prompt = new Prompt();
-    @Value("${gemini.api.url}")
-    private String API_URL;
-    @Value("${gemini.api.key}")
-    private String API_KEY;
-
+    private final String API_URL;
+    private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
-    public ChatService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(API_URL).build();
+    public ChatService(
+            WebClient.Builder webClientBuilder,
+            @Value("${gemini.api.url}") String apiUrl,
+            @Value("${gemini.api.key}") String apiKey
+    ) {
+        this.API_URL = apiUrl;
+        this.API_KEY = apiKey;
+        this.webClient = webClientBuilder.baseUrl(apiUrl).build();
     }
 
     //Envía el mensaje al modelo de IA y devuelve la respuesta
