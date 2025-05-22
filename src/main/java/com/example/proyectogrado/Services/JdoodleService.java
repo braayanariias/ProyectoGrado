@@ -2,7 +2,6 @@ package com.example.proyectogrado.Services;
 
 
 import com.example.proyectogrado.Models.Jdoodle;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -50,25 +49,10 @@ public class JdoodleService {
                     .header("Content-Type", "application/json")
                     .bodyValue(requestBodyJson)
                     .retrieve()
-                    .bodyToMono(String.class)
-                    .map(this::extractOutput);
+                    .bodyToMono(String.class);
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Error al generar el JSON del request para JDoodle", e));
         }
     }
 
-    /**
-     * Extrae el output de la respuesta de JDoodle.
-     */
-    private String extractOutput(String response) {
-        try {
-            JsonNode rootNode = objectMapper.readTree(response);
-            if (rootNode.has("output")) {
-                return rootNode.get("output").asText();
-            }
-            return response;
-        } catch (Exception e) {
-            return "Error al procesar la respuesta de JDoodle: " + e.getMessage();
-        }
-    }
 }

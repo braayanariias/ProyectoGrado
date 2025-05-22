@@ -13,7 +13,6 @@ public class JdoodleController {
 
     private final JdoodleService jdoodleService;
 
-    @Autowired
     public JdoodleController(JdoodleService jdoodleService) {
         this.jdoodleService = jdoodleService;
     }
