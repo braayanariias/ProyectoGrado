@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,13 +27,12 @@ public class ChatService {
     public ChatService(
             WebClient.Builder webClientBuilder,
             @Value("${gemini.api.url}") String apiUrl,
-            @Value("${gemini.api.key}") String apiKey
-    ) {
+            @Value("${gemini.api.key}") String apiKey) {
         this.API_KEY = apiKey;
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
     }
 
-    //Envía el mensaje al modelo de IA y devuelve la respuesta
+    // Envía el mensaje al modelo de IA y devuelve la respuesta
     public Mono<String> sendMessage() {
         // Agregar mensaje del usuario al historial
         ChatMessage.Part part = new ChatMessage.Part();
@@ -61,7 +61,7 @@ public class ChatService {
         }
     }
 
-    //Extrae el mensaje de la respuesta del modelo de IA
+    // Extrae el mensaje de la respuesta del modelo de IA
     private String extractMessage(String response) {
         try {
             JsonNode rootNode = objectMapper.readTree(response);
@@ -78,6 +78,28 @@ public class ChatService {
         } catch (Exception e) {
             return "Error al procesar la respuesta del modelo: " + e.getMessage();
         }
+    }
+
+    public static Map<String, String> extractTitleAndContent(String ejercicio) {
+        Map<String, String> result = new HashMap<>();
+        String title = "";
+        String content = "";
+
+        // Buscar el primer título entre ** **
+        int start = ejercicio.indexOf("**");
+        int end = ejercicio.indexOf("**", start + 2);
+
+        if (start != -1 && end != -1) {
+            title = ejercicio.substring(start + 2, end).trim();
+            content = ejercicio.substring(end + 2).trim();
+        } else {
+            // Si no encuentra el formato, todo es contenido
+            content = ejercicio;
+        }
+
+        result.put("title", title);
+        result.put("content", content);
+        return result;
     }
 
 }

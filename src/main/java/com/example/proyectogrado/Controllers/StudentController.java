@@ -2,14 +2,14 @@ package com.example.proyectogrado.Controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.proyectogrado.Models.Student;
 import com.example.proyectogrado.Services.StudentService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-@Controller
+@RestController
 @RequestMapping("/api/student")
 public class StudentController {
 
