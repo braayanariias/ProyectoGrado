@@ -33,6 +33,7 @@ public class StudentController {
     @PostMapping("/create")
     public Student createStudent(@RequestBody StudentDTO studentDTO) {
         Student student = new Student();
+        student.setId(studentDTO.getId()); // UUID de Supabase
         student.setFullName(studentDTO.getFullName());
         student.setEmail(studentDTO.getEmail());
         return studentService.saveStudent(student);
@@ -46,6 +47,22 @@ public class StudentController {
         student.setEmail(studentDTO.getEmail());
         Student updatedStudent = studentService.saveStudent(student);
         return ResponseEntity.ok(updatedStudent);
+    }
+    
+    @PostMapping("/sync-from-supabase")
+    public ResponseEntity<Student> syncStudentFromSupabase(@RequestBody StudentDTO studentDTO) {
+        // Validar que el DTO tenga todos los campos requeridos
+        if (studentDTO.getId() == null || studentDTO.getEmail() == null || studentDTO.getFullName() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        Student student = new Student();
+        student.setId(studentDTO.getId()); // UUID generado por Supabase
+        student.setFullName(studentDTO.getFullName());
+        student.setEmail(studentDTO.getEmail());
+        
+        Student savedStudent = studentService.saveStudent(student);
+        return ResponseEntity.ok(savedStudent);
     }
     
 }

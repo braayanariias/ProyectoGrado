@@ -19,49 +19,34 @@ public class StudentService {
     }
 
     public Student saveStudent(Student student) {
-        // Si el student tiene un ID, es una actualización
-        if (student.getId() != null) {
-            return updateStudent(student);
+        // Validar que el student tenga un ID (UUID de Supabase)
+        if (student.getId() == null) {
+            throw new IllegalArgumentException("El estudiante debe tener un UUID válido de Supabase");
         }
         
-        // Si no tiene ID, verificar si ya existe por email
-        Optional<Student> existingStudent = studentRepository.findByEmail(student.getEmail());
-        if (existingStudent.isPresent()) {
-            // Si ya existe, actualizar la información
-            Student existing = existingStudent.get();
-            existing.setFullName(student.getFullName());
-            return studentRepository.save(existing);
-        } else {
-            // Si no existe, crear uno nuevo
-            return studentRepository.save(student);
-        }
-    }
-    
-    private Student updateStudent(Student student) {
-        // Buscar el estudiante existente por ID
-        Optional<Student> existingStudentOpt = studentRepository.findById(student.getId());
-        
-        if (existingStudentOpt.isPresent()) {
-            Student existing = existingStudentOpt.get();
-            // Actualizar solo los campos necesarios
+        // Verificar si ya existe por ID (UUID de Supabase)
+        Optional<Student> existingById = studentRepository.findById(student.getId());
+        if (existingById.isPresent()) {
+            // Si existe por ID, actualizar la información
+            Student existing = existingById.get();
             existing.setFullName(student.getFullName());
             existing.setEmail(student.getEmail());
             return studentRepository.save(existing);
-        } else {
-            // Si no existe con ese ID, verificar por email
-            Optional<Student> existingByEmail = studentRepository.findByEmail(student.getEmail());
-            if (existingByEmail.isPresent()) {
-                Student existing = existingByEmail.get();
-                existing.setFullName(student.getFullName());
-                return studentRepository.save(existing);
-            } else {
-                // Si no existe ni por ID ni por email, crear uno nuevo pero sin el ID
-                Student newStudent = new Student();
-                newStudent.setFullName(student.getFullName());
-                newStudent.setEmail(student.getEmail());
-                return studentRepository.save(newStudent);
-            }
         }
+        
+        // Verificar si existe por email (para casos de migración o inconsistencias)
+        Optional<Student> existingByEmail = studentRepository.findByEmail(student.getEmail());
+        if (existingByEmail.isPresent()) {
+            // Si existe por email pero con diferente ID, actualizar el ID también
+            Student existing = existingByEmail.get();
+            existing.setId(student.getId()); // Actualizar con el UUID de Supabase
+            existing.setFullName(student.getFullName());
+            existing.setEmail(student.getEmail());
+            return studentRepository.save(existing);
+        }
+        
+        // Si no existe, crear uno nuevo con el UUID de Supabase
+        return studentRepository.save(student);
     }
     
 }

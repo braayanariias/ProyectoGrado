@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String fullName;

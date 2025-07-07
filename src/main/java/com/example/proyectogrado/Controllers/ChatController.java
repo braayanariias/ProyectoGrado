@@ -1,6 +1,7 @@
 package com.example.proyectogrado.Controllers;
 
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Services.ChatService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +20,13 @@ public class ChatController {
     };
 
     @PostMapping("/send")
-    public Mono<String> sendMessage(@RequestBody Student student) {
+    public Mono<String> sendMessage(@RequestBody StudentDTO studentDTO) {
+        // Convertir DTO a entidad Student
+        Student student = new Student();
+        student.setId(studentDTO.getId()); // UUID de Supabase
+        student.setFullName(studentDTO.getFullName());
+        student.setEmail(studentDTO.getEmail());
+        
         return chatService.sendMessage(student);
     }
 
