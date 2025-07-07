@@ -1,12 +1,18 @@
 package com.example.proyectogrado.Controllers;
 
-import org.springframework.stereotype.Controller;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Services.StudentService;
+
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
@@ -22,6 +28,24 @@ public class StudentController {
     @PostMapping("/save")
     public Student saveStudent(@RequestBody Student student) {
         return studentService.saveStudent(student);
+    }
+    
+    @PostMapping("/create")
+    public Student createStudent(@RequestBody StudentDTO studentDTO) {
+        Student student = new Student();
+        student.setFullName(studentDTO.getFullName());
+        student.setEmail(studentDTO.getEmail());
+        return studentService.saveStudent(student);
+    }
+    
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Student> updateStudent(@PathVariable UUID id, @RequestBody StudentDTO studentDTO) {
+        Student student = new Student();
+        student.setId(id);
+        student.setFullName(studentDTO.getFullName());
+        student.setEmail(studentDTO.getEmail());
+        Student updatedStudent = studentService.saveStudent(student);
+        return ResponseEntity.ok(updatedStudent);
     }
     
 }

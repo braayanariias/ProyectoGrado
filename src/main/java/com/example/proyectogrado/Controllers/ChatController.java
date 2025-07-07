@@ -1,7 +1,9 @@
 package com.example.proyectogrado.Controllers;
 
+import com.example.proyectogrado.Models.Student;
 import com.example.proyectogrado.Services.ChatService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -17,8 +19,8 @@ public class ChatController {
     };
 
     @PostMapping("/send")
-    public Mono<String> sendMessage() {
-        return chatService.sendMessage();
+    public Mono<String> sendMessage(@RequestBody Student student) {
+        return chatService.sendMessage(student);
     }
 
 }

@@ -15,21 +15,15 @@ import lombok.NoArgsConstructor;
 public class Student {
 
     @Id
-    @GeneratedValue (strategy =GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String firstName;
-
-    private String lastName;
+    private String fullName;
 
     @Column(unique = true)
     private String email;
 
-    @Column(unique = true)
-    private String code;
-
-    private String exercise = "";
-    
-    private Double score = 0.0;
+    @Version
+    private Long version;
 
 }

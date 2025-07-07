@@ -2,6 +2,7 @@ package com.example.proyectogrado.Services;
 
 import com.example.proyectogrado.Models.ChatMessage;
 import com.example.proyectogrado.Models.Prompt;
+import com.example.proyectogrado.Models.Student;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -11,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,17 +23,23 @@ public class ChatService {
     private final Prompt prompt = new Prompt();
     private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+    private final StudentService studentService;
 
     public ChatService(
             WebClient.Builder webClientBuilder,
             @Value("${gemini.api.url}") String apiUrl,
-            @Value("${gemini.api.key}") String apiKey) {
+            @Value("${gemini.api.key}") String apiKey,
+            StudentService studentService) {
         this.API_KEY = apiKey;
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
+        this.studentService = studentService;
     }
 
     // Envía el mensaje al modelo de IA y devuelve la respuesta
-    public Mono<String> sendMessage() {
+    public Mono<String> sendMessage(Student student) {
+        // Guardar el estudiante en la base de datos
+        studentService.saveStudent(student);
+        
         // Agregar mensaje del usuario al historial
         ChatMessage.Part part = new ChatMessage.Part();
         part.setText(prompt.getPrompt());
@@ -78,28 +84,6 @@ public class ChatService {
         } catch (Exception e) {
             return "Error al procesar la respuesta del modelo: " + e.getMessage();
         }
-    }
-
-    public static Map<String, String> extractTitleAndContent(String ejercicio) {
-        Map<String, String> result = new HashMap<>();
-        String title = "";
-        String content = "";
-
-        // Buscar el primer título entre ** **
-        int start = ejercicio.indexOf("**");
-        int end = ejercicio.indexOf("**", start + 2);
-
-        if (start != -1 && end != -1) {
-            title = ejercicio.substring(start + 2, end).trim();
-            content = ejercicio.substring(end + 2).trim();
-        } else {
-            // Si no encuentra el formato, todo es contenido
-            content = ejercicio;
-        }
-
-        result.put("title", title);
-        result.put("content", content);
-        return result;
     }
 
 }
