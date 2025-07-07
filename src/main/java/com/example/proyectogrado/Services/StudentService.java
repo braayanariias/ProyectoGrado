@@ -49,4 +49,9 @@ public class StudentService {
         return studentRepository.save(student);
     }
     
+    public Student findByEmail(String email) {
+        Optional<Student> student = studentRepository.findByEmail(email);
+        return student.orElse(null);
+    }
+    
 }

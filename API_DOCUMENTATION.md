@@ -145,6 +145,72 @@ Endpoint legacy que recibe directamente el objeto Student completo.
 
 ---
 
+### 3. Ejercicios - Gestión de ejercicios asignados
+
+### GET `/api/exercises/student/{studentId}`
+
+Obtiene todos los ejercicios asignados a un estudiante específico ordenados por fecha de asignación (más recientes primero).
+
+**Response:**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "exerciseContent": "Ejercicio de programación generado...",
+  "assignedDate": "2025-07-07T10:30:00",
+  "isCompleted": false,
+  "student": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "estudiante@ejemplo.com",
+    "fullName": "Juan Pérez"
+  }
+}
+```
+
+### GET `/api/exercises/student/email/{email}`
+
+Obtiene todos los ejercicios de un estudiante usando su email.
+
+### GET `/api/exercises/pending`
+
+Obtiene todos los ejercicios pendientes (no completados) de todos los estudiantes.
+
+### PUT `/api/exercises/{exerciseId}/complete`
+
+Marca un ejercicio como completado.
+
+**Response:**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "exerciseContent": "Ejercicio de programación generado...",
+  "assignedDate": "2025-07-07T10:30:00",
+  "isCompleted": true,
+  "student": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "estudiante@ejemplo.com",
+    "fullName": "Juan Pérez"
+  }
+}
+```
+
+### GET `/api/exercises/{exerciseId}`
+
+Obtiene los detalles de un ejercicio específico.
+
+**Ejemplos con curl:**
+```bash
+# Obtener ejercicios de un estudiante
+curl -X GET http://localhost:8080/api/exercises/student/550e8400-e29b-41d4-a716-446655440000
+
+# Obtener ejercicios pendientes
+curl -X GET http://localhost:8080/api/exercises/pending
+
+# Marcar ejercicio como completado
+curl -X PUT http://localhost:8080/api/exercises/550e8400-e29b-41d4-a716-446655440001/complete
+```
+
+---
+
 ## Comportamiento del Sistema
 
 ### Lógica de Sincronización
@@ -181,6 +247,8 @@ Endpoint legacy que recibe directamente el objeto Student completo.
 2. **Obtener datos**: Frontend obtiene `user.id`, `user.email` y `user.user_metadata.full_name` de Supabase
 3. **Sincronización**: Enviar datos a `/api/student/sync-from-supabase`
 4. **Chat**: Usar los mismos datos para `/api/chat/send`
+5. **Consultar ejercicios**: Usar `/api/exercises/student/{studentId}` para ver historial
+6. **Completar ejercicio**: Usar `/api/exercises/{exerciseId}/complete` cuando termine
 
 ### Ejemplo de Integración JavaScript
 
@@ -194,17 +262,26 @@ const studentData = {
   fullName: user.user_metadata.full_name
 };
 
-// Sincronizar con backend
+// 1. Sincronizar con backend
 await fetch('/api/student/sync-from-supabase', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(studentData)
 });
 
-// Generar ejercicio
-const response = await fetch('/api/chat/send', {
+// 2. Generar ejercicio (se guarda automáticamente)
+const exerciseResponse = await fetch('/api/chat/send', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(studentData)
 });
+
+const exerciseContent = await exerciseResponse.text();
+
+// 3. Obtener historial de ejercicios
+const exercisesResponse = await fetch(`/api/exercises/student/${user.id}`);
+const exercises = await exercisesResponse.json();
+
+// 4. Marcar ejercicio como completado (cuando el usuario termine)
+// await fetch(`/api/exercises/${exerciseId}/complete`, { method: 'PUT' });
 ```

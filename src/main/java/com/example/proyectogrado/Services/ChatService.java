@@ -1,6 +1,7 @@
 package com.example.proyectogrado.Services;
 
 import com.example.proyectogrado.Models.ChatMessage;
+import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Prompt;
 import com.example.proyectogrado.Models.Student;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,15 +25,18 @@ public class ChatService {
     private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
     private final StudentService studentService;
+    private final ExerciseService exerciseService;
 
     public ChatService(
             WebClient.Builder webClientBuilder,
             @Value("${gemini.api.url}") String apiUrl,
             @Value("${gemini.api.key}") String apiKey,
-            StudentService studentService) {
+            StudentService studentService,
+            ExerciseService exerciseService) {
         this.API_KEY = apiKey;
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
         this.studentService = studentService;
+        this.exerciseService = exerciseService;
     }
 
     // Envía el mensaje al modelo de IA y devuelve la respuesta
@@ -61,7 +65,12 @@ public class ChatService {
                     .bodyValue(requestBodyJson)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .map(this::extractMessage);
+                    .map(response -> {
+                        String exerciseContent = extractMessage(response);
+                        // Guardar el ejercicio en la base de datos relacionado con el estudiante
+                        exerciseService.createAndSaveExercise(exerciseContent, student);
+                        return exerciseContent;
+                    });
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Error al generar el JSON del request", e));
         }
