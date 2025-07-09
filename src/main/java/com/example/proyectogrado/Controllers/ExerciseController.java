@@ -2,8 +2,10 @@ package com.example.proyectogrado.Controllers;
 
 import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.DTOs.SolutionResponseDTO;
 import com.example.proyectogrado.Services.ExerciseService;
 import com.example.proyectogrado.Services.StudentService;
+import com.example.proyectogrado.Services.SolutionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +20,12 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
     private final StudentService studentService;
+    private final SolutionService solutionService;
 
-    public ExerciseController(ExerciseService exerciseService, StudentService studentService) {
+    public ExerciseController(ExerciseService exerciseService, StudentService studentService, SolutionService solutionService) {
         this.exerciseService = exerciseService;
         this.studentService = studentService;
+        this.solutionService = solutionService;
     }
 
     @GetMapping("/student/{studentId}")
@@ -61,6 +65,24 @@ public class ExerciseController {
         Optional<Exercise> exercise = exerciseService.getExerciseById(exerciseId);
         if (exercise.isPresent()) {
             return ResponseEntity.ok(exercise.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{exerciseId}/solutions")
+    public ResponseEntity<List<SolutionResponseDTO>> getSolutionsByExercise(@PathVariable UUID exerciseId) {
+        List<SolutionResponseDTO> solutions = solutionService.getSolutionsByExerciseId(exerciseId);
+        return ResponseEntity.ok(solutions);
+    }
+
+    @GetMapping("/{exerciseId}/solutions/latest/student/{email}")
+    public ResponseEntity<SolutionResponseDTO> getLatestSolutionForExercise(
+            @PathVariable UUID exerciseId,
+            @PathVariable String email) {
+        Optional<SolutionResponseDTO> solution = solutionService.getLatestSolutionByExerciseAndStudent(exerciseId, email);
+        if (solution.isPresent()) {
+            return ResponseEntity.ok(solution.get());
         } else {
             return ResponseEntity.notFound().build();
         }

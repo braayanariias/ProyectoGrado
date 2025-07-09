@@ -25,6 +25,22 @@ CREATE TABLE IF NOT EXISTS exercises (
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
 
+-- Crear la tabla solutions si no existe
+CREATE TABLE IF NOT EXISTS solutions (
+    id VARCHAR(36) PRIMARY KEY,
+    code TEXT NOT NULL,
+    feedback TEXT,
+    grade INT CHECK (grade >= 1 AND grade <= 5),
+    submitted_date DATETIME NOT NULL,
+    evaluated_date DATETIME,
+    is_evaluated BOOLEAN DEFAULT FALSE,
+    exercise_id VARCHAR(36) NOT NULL,
+    student_id VARCHAR(36) NOT NULL,
+    FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+
 -- Verificar que las tablas se crearon correctamente
 DESCRIBE students;
 DESCRIBE exercises;
+DESCRIBE solutions;

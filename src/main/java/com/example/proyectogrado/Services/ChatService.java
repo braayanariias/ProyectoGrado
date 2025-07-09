@@ -1,7 +1,6 @@
 package com.example.proyectogrado.Services;
 
 import com.example.proyectogrado.Models.ChatMessage;
-import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Prompt;
 import com.example.proyectogrado.Models.Student;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -92,6 +91,37 @@ public class ChatService {
             return "No se pudo extraer la respuesta del modelo.";
         } catch (Exception e) {
             return "Error al procesar la respuesta del modelo: " + e.getMessage();
+        }
+    }
+
+    // Método para generar respuestas generales (usado para evaluación de código)
+    public String generateResponse(String message) {
+        try {
+            // Crear el mensaje del usuario
+            ChatMessage.Part part = new ChatMessage.Part();
+            part.setText(message);
+
+            ChatMessage userChatMessage = new ChatMessage();
+            userChatMessage.setRole("user");
+            userChatMessage.setParts(List.of(part));
+
+            // Crear una conversación temporal solo para esta consulta
+            List<ChatMessage> tempConversation = List.of(userChatMessage);
+            Map<String, Object> requestBody = Map.of("contents", tempConversation);
+            
+            String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+            String response = webClient.post()
+                    .uri("/gemini-2.0-flash:generateContent?key=" + API_KEY)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestBodyJson)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block(); // Bloquear para obtener respuesta síncrona
+
+            return extractMessage(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar respuesta con Gemini: " + e.getMessage(), e);
         }
     }
 
