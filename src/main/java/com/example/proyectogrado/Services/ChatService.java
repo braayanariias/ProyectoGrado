@@ -1,8 +1,10 @@
 package com.example.proyectogrado.Services;
 
 import com.example.proyectogrado.Models.ChatMessage;
+import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Prompt;
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.DTOs.ExerciseResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,7 +41,7 @@ public class ChatService {
     }
 
     // Envía el mensaje al modelo de IA y devuelve la respuesta
-    public Mono<String> sendMessage(Student student) {
+    public Mono<ExerciseResponseDTO> sendMessage(Student student) {
         // Guardar el estudiante en la base de datos
         studentService.saveStudent(student);
         
@@ -67,8 +69,9 @@ public class ChatService {
                     .map(response -> {
                         String exerciseContent = extractMessage(response);
                         // Guardar el ejercicio en la base de datos relacionado con el estudiante
-                        exerciseService.createAndSaveExercise(exerciseContent, student);
-                        return exerciseContent;
+                        Exercise savedExercise = exerciseService.createAndSaveExercise(exerciseContent, student);
+                        // Devolver tanto el ID como el contenido del ejercicio
+                        return new ExerciseResponseDTO(savedExercise.getId(), exerciseContent);
                     });
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Error al generar el JSON del request", e));
