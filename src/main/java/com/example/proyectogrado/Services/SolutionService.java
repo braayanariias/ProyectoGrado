@@ -3,6 +3,7 @@ package com.example.proyectogrado.Services;
 import com.example.proyectogrado.Models.Solution;
 import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.EvaluationPrompt;
 import com.example.proyectogrado.Models.DTOs.SolutionSubmissionDTO;
 import com.example.proyectogrado.Models.DTOs.SolutionResponseDTO;
 import com.example.proyectogrado.Repositorys.SolutionRepository;
@@ -22,6 +23,7 @@ public class SolutionService {
     private final ExerciseService exerciseService;
     private final StudentService studentService;
     private final ChatService chatService;
+    private final EvaluationPrompt evaluationPrompt;
 
     public SolutionService(SolutionRepository solutionRepository, 
                           ExerciseService exerciseService, 
@@ -31,6 +33,7 @@ public class SolutionService {
         this.exerciseService = exerciseService;
         this.studentService = studentService;
         this.chatService = chatService;
+        this.evaluationPrompt = new EvaluationPrompt();
     }
 
     @Transactional
@@ -101,34 +104,17 @@ public class SolutionService {
     }
 
     private String createEvaluationPrompt(Solution solution) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Por favor evalúa la siguiente solución de código de un estudiante.\n\n");
-        prompt.append("EJERCICIO ORIGINAL:\n");
-        prompt.append(solution.getExercise().getExerciseContent());
-        prompt.append("\n\nCÓDIGO ENVIADO POR EL ESTUDIANTE:\n");
-        prompt.append(solution.getCode());
-        prompt.append("\n\nINSTRUCCIONES:\n");
-        prompt.append("1. Analiza si el código resuelve correctamente el problema planteado\n");
-        prompt.append("2. Evalúa la calidad del código (sintaxis, lógica, buenas prácticas)\n");
-        prompt.append("3. Proporciona feedback constructivo\n");
-        prompt.append("4. Asigna una nota del 1 al 5 donde:\n");
-        prompt.append("   - 1: Muy deficiente (no funciona o está muy mal)\n");
-        prompt.append("   - 2: Deficiente (funciona parcialmente con errores importantes)\n");
-        prompt.append("   - 3: Regular (funciona pero con errores menores o puede mejorar)\n");
-        prompt.append("   - 4: Bueno (funciona bien con algunas mejoras menores)\n");
-        prompt.append("   - 5: Excelente (funciona perfectamente y está bien escrito)\n\n");
-        prompt.append("FORMATO DE RESPUESTA REQUERIDO:\n");
-        prompt.append("NOTA: [número del 1 al 5]\n");
-        prompt.append("FEEDBACK: [tu análisis y recomendaciones detalladas]");
-        
-        return prompt.toString();
+        return evaluationPrompt.generateEvaluationPrompt(
+                solution.getExercise().getExerciseContent(),
+                solution.getCode()
+        );
     }
 
     private void parseGeminiEvaluation(Solution solution, String geminiResponse) {
         try {
             // Buscar la nota
             String[] lines = geminiResponse.split("\n");
-            Integer grade = null;
+            Double grade = null;
             StringBuilder feedback = new StringBuilder();
             boolean feedbackStarted = false;
 
@@ -136,12 +122,12 @@ public class SolutionService {
                 if (line.trim().startsWith("NOTA:")) {
                     String gradeStr = line.replace("NOTA:", "").trim();
                     try {
-                        grade = Integer.parseInt(gradeStr);
-                        if (grade < 1 || grade > 5) {
-                            grade = 3; // Valor por defecto si está fuera del rango
+                        grade = Double.parseDouble(gradeStr);
+                        if (grade < 0.0 || grade > 5.0) {
+                            grade = 3.0; // Valor por defecto si está fuera del rango
                         }
                     } catch (NumberFormatException e) {
-                        grade = 3; // Valor por defecto si no se puede parsear
+                        grade = 3.0; // Valor por defecto si no se puede parsear
                     }
                 } else if (line.trim().startsWith("FEEDBACK:")) {
                     feedbackStarted = true;
@@ -153,7 +139,7 @@ public class SolutionService {
 
             // Si no se encontró nota, usar valor por defecto
             if (grade == null) {
-                grade = 3;
+                grade = 3.0;
             }
 
             // Si no se encontró feedback específico, usar toda la respuesta
@@ -166,7 +152,7 @@ public class SolutionService {
 
         } catch (Exception e) {
             // En caso de error al parsear, usar valores por defecto
-            solution.setGrade(3);
+            solution.setGrade(3.0);
             solution.setFeedback("Evaluación completada. " + geminiResponse);
         }
     }

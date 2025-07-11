@@ -27,7 +27,7 @@ public class Solution {
     private String feedback;
 
     @Column(name = "grade")
-    private Integer grade; // Nota del 1 al 5
+    private Double grade; // Nota del 0 al 5 (puede incluir decimales)
 
     @Column(name = "submitted_date")
     private LocalDateTime submittedDate;

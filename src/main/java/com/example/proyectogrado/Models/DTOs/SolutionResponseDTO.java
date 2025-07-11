@@ -14,7 +14,7 @@ public class SolutionResponseDTO {
     private UUID id;
     private String code;
     private String feedback;
-    private Integer grade;
+    private Double grade;
     private LocalDateTime submittedDate;
     private LocalDateTime evaluatedDate;
     private UUID exerciseId;
