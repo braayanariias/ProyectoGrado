@@ -64,6 +64,9 @@ public class SolutionService {
         // Guardar la solución antes de evaluarla
         Solution savedSolution = solutionRepository.save(solution);
 
+        // Marcar el ejercicio como completado
+        exerciseService.markAsCompleted(exercise.getId());
+
         // Evaluar el código con Gemini
         try {
             evaluateSolutionWithGemini(savedSolution);
