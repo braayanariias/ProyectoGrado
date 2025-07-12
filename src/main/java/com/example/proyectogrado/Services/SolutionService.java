@@ -6,6 +6,8 @@ import com.example.proyectogrado.Models.Student;
 import com.example.proyectogrado.Models.EvaluationPrompt;
 import com.example.proyectogrado.Models.DTOs.SolutionSubmissionDTO;
 import com.example.proyectogrado.Models.DTOs.SolutionResponseDTO;
+import com.example.proyectogrado.Models.DTOs.JDoodleResponseDTO;
+import com.example.proyectogrado.Exceptions.CodeCompilationException;
 import com.example.proyectogrado.Repositorys.SolutionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +25,19 @@ public class SolutionService {
     private final ExerciseService exerciseService;
     private final StudentService studentService;
     private final ChatService chatService;
+    private final JDoodleService jDoodleService;
     private final EvaluationPrompt evaluationPrompt;
 
     public SolutionService(SolutionRepository solutionRepository, 
                           ExerciseService exerciseService, 
                           StudentService studentService,
-                          ChatService chatService) {
+                          ChatService chatService,
+                          JDoodleService jDoodleService) {
         this.solutionRepository = solutionRepository;
         this.exerciseService = exerciseService;
         this.studentService = studentService;
         this.chatService = chatService;
+        this.jDoodleService = jDoodleService;
         this.evaluationPrompt = new EvaluationPrompt();
     }
 
@@ -57,14 +62,26 @@ public class SolutionService {
             throw new RuntimeException("Exercise does not belong to the student");
         }
 
-        // Crear la solución
+        // VALIDACIÓN CON JDOODLE ANTES DE GUARDAR (solo compilación)
+        JDoodleResponseDTO compilationResult = jDoodleService.validateJavaCodeCompileOnly(submissionDTO.getCode());
+        
+        // Si el código no compila, lanzar excepción con detalles de compilación
+        if (!compilationResult.isCompiled()) {
+            String errorMessage = "El código no compila correctamente";
+            String compilationError = compilationResult.getError() != null ? 
+                                    compilationResult.getError() : 
+                                    compilationResult.getOutput();
+            throw new CodeCompilationException(errorMessage, compilationError, compilationResult.getOutput());
+        }
+
+        // Si llegamos aquí, el código compila correctamente, procedemos a guardarlo
         Solution solution = new Solution();
         solution.setCode(submissionDTO.getCode());
         solution.setExercise(exercise);
         solution.setStudent(student);
         solution.setIsEvaluated(false);
 
-        // Guardar la solución antes de evaluarla
+        // Guardar la solución
         Solution savedSolution = solutionRepository.save(solution);
 
         // Marcar el ejercicio como completado

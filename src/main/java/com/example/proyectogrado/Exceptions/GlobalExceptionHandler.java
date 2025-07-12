@@ -42,6 +42,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(CodeCompilationException.class)
+    public ResponseEntity<Map<String, String>> handleCodeCompilationException(CodeCompilationException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "COMPILATION_ERROR");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("compilationError", ex.getCompilationError());
+        errorResponse.put("jdoodleOutput", ex.getJdoodleOutput());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
         Map<String, String> errorResponse = new HashMap<>();

@@ -2,11 +2,14 @@ package com.example.proyectogrado.Controllers;
 
 import com.example.proyectogrado.Models.DTOs.SolutionSubmissionDTO;
 import com.example.proyectogrado.Models.DTOs.SolutionResponseDTO;
+import com.example.proyectogrado.Exceptions.CodeCompilationException;
 import com.example.proyectogrado.Services.SolutionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,12 +25,19 @@ public class SolutionController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<SolutionResponseDTO> submitSolution(@RequestBody SolutionSubmissionDTO submissionDTO) {
+    public ResponseEntity<?> submitSolution(@RequestBody SolutionSubmissionDTO submissionDTO) {
         try {
             SolutionResponseDTO response = solutionService.submitSolution(submissionDTO);
             return ResponseEntity.ok(response);
+        } catch (CodeCompilationException e) {
+            // Error de compilación específico - será manejado por GlobalExceptionHandler
+            throw e;
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            // Otros errores de runtime
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "SUBMISSION_ERROR");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 

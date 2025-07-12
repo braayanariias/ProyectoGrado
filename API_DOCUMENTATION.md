@@ -1,438 +1,481 @@
-# API Documentation
+# API Documentation - ProyectoGrado
 
-## Arquitectura de Autenticación
+## Descripción General
+API REST para un sistema de gestión de ejercicios de programación con evaluación automática de código Java. El sistema incluye integración con Gemini AI para generación de ejercicios y evaluación, y JDoodle para validación de compilación de código.
 
-Esta API está diseñada para trabajar con **Supabase** como sistema de autenticación principal. Los UUIDs de los estudiantes son generados por Supabase y sincronizados con nuestra base de datos local.
+## Base URL
+```
+http://localhost:8080/api
+```
+
+## Configuración CORS
+La API tiene CORS habilitado para permitir requests desde cualquier origen (`origins = "*"`).
 
 ---
 
-## Endpoints
+## 🎓 Student Management
 
-### 1. Chat - Generar ejercicio de programación
+### POST /api/student/save
+Guarda un estudiante en la base de datos.
 
-#### POST `/api/chat/send`
-
-Recibe información del estudiante autenticado desde Supabase, sincroniza los datos y genera un ejercicio de programación personalizado.
-
-**Request Body (StudentDTO):**
+**Request Body:**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "estudiante@ejemplo.com",
-  "fullName": "Juan Pérez"
+    "id": "a123b456-c789-0123-d456-e789f0123456",
+    "fullName": "Juan Pérez",
+    "email": "juan.perez@email.com"
 }
 ```
 
 **Response:**
 ```json
-"Ejercicio de programación generado por la IA basado en el perfil del estudiante..."
-```
-
-**Ejemplo con curl:**
-```bash
-curl -X POST http://localhost:8080/api/chat/send \
-  -H "Content-Type: application/json" \
-  -d '{
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "estudiante@ejemplo.com",
-    "fullName": "Juan Pérez"
-  }'
-```
-
----
-
-### 2. Estudiantes - Crear/Actualizar
-
-#### POST `/api/student/create`
-
-Crea o actualiza un estudiante usando el UUID generado por Supabase.
-
-**Request Body (StudentDTO):**
-```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "estudiante@ejemplo.com",
-  "fullName": "Juan Pérez"
+    "id": "a123b456-c789-0123-d456-e789f0123456",
+    "fullName": "Juan Pérez",
+    "email": "juan.perez@email.com",
+    "version": 0
 }
 ```
 
-**Response (Student):**
+### POST /api/student/create
+Crea un nuevo estudiante usando DTO.
+
+**Request Body:**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "estudiante@ejemplo.com",
-  "fullName": "Juan Pérez",
-  "version": 0
+    "id": "a123b456-c789-0123-d456-e789f0123456",
+    "fullName": "María García",
+    "email": "maria.garcia@email.com"
 }
 ```
 
----
-
-### 3. Estudiantes - Sincronización desde Supabase
-
-#### POST `/api/student/sync-from-supabase`
-
-Endpoint específico para sincronizar datos de estudiantes desde Supabase. Incluye validaciones adicionales.
-
-**Request Body (StudentDTO):**
+**Response:**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "estudiante@ejemplo.com",
-  "fullName": "Juan Pérez"
+    "id": "a123b456-c789-0123-d456-e789f0123456",
+    "fullName": "María García",
+    "email": "maria.garcia@email.com",
+    "version": 0
 }
 ```
 
-**Response (Student):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "estudiante@ejemplo.com",
-  "fullName": "Juan Pérez",
-  "version": 0
-}
-```
-
-**Validaciones:**
-- Todos los campos (`id`, `email`, `fullName`) son obligatorios
-- El `id` debe ser un UUID válido generado por Supabase
-
----
-
-### 4. Estudiantes - Actualizar por ID
-
-#### PUT `/api/student/update/{id}`
-
-Actualiza un estudiante específico usando su UUID.
+### PUT /api/student/update/{id}
+Actualiza un estudiante existente.
 
 **Path Parameters:**
-- `id` (UUID): UUID del estudiante
+- `id`: UUID del estudiante
 
-**Request Body (StudentDTO):**
+**Request Body:**
 ```json
 {
-  "email": "nuevo_email@ejemplo.com",
-  "fullName": "Juan Carlos Pérez"
+    "fullName": "María García Actualizada",
+    "email": "maria.garcia.updated@email.com"
 }
 ```
 
-**Response (Student):**
+### POST /api/student/sync-from-supabase
+Sincroniza un estudiante desde Supabase.
+
+**Request Body:**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "nuevo_email@ejemplo.com",
-  "fullName": "Juan Carlos Pérez",
-  "version": 1
-}
-```
-
----
-
-### 5. Estudiantes - Guardar directo (Legacy)
-
-#### POST `/api/student/save`
-
-Endpoint legacy que recibe directamente el objeto Student completo.
-
-**Request Body (Student):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "estudiante@ejemplo.com",
-  "fullName": "Juan Pérez"
+    "id": "a123b456-c789-0123-d456-e789f0123456",
+    "fullName": "Carlos Rodriguez",
+    "email": "carlos.rodriguez@email.com"
 }
 ```
 
 ---
 
-### 6. Ejercicios - Gestión de ejercicios asignados
+## 🤖 Chat & Exercise Generation
 
-#### GET `/api/exercises/student/{studentId}`
+### POST /api/chat/send
+Envía datos del estudiante a Gemini AI para generar un ejercicio personalizado.
 
-Obtiene todos los ejercicios asignados a un estudiante específico ordenados por fecha de asignación (más recientes primero).
+**Request Body:**
+```json
+{
+    "id": "a123b456-c789-0123-d456-e789f0123456",
+    "fullName": "Ana López",
+    "email": "ana.lopez@email.com"
+}
+```
 
 **Response:**
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440001",
-  "exerciseContent": "Ejercicio de programación generado...",
-  "assignedDate": "2025-07-07T10:30:00",
-  "isCompleted": false,
-  "student": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "estudiante@ejemplo.com",
-    "fullName": "Juan Pérez"
-  }
+    "exerciseId": "b234c567-d890-1234-e567-f890a1234567",
+    "exerciseContent": "Crear una clase Calculator con métodos para suma, resta, multiplicación y división..."
 }
 ```
-
-#### GET `/api/exercises/student/email/{email}`
-
-Obtiene todos los ejercicios de un estudiante usando su email.
-
-#### GET `/api/exercises/pending`
-
-Obtiene todos los ejercicios pendientes (no completados) de todos los estudiantes.
-
-#### PUT `/api/exercises/{exerciseId}/complete`
-
-Marca un ejercicio como completado.
-
-**Response:**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440001",
-  "exerciseContent": "Ejercicio de programación generado...",
-  "assignedDate": "2025-07-07T10:30:00",
-  "isCompleted": true,
-  "student": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "estudiante@ejemplo.com",
-    "fullName": "Juan Pérez"
-  }
-}
-```
-
-#### GET `/api/exercises/{exerciseId}`
-
-Obtiene los detalles de un ejercicio específico.
-
-#### GET `/api/exercises/{exerciseId}/solutions`
-
-Obtiene todas las soluciones enviadas para un ejercicio específico.
-
-#### GET `/api/exercises/{exerciseId}/solutions/latest/student/{email}`
-
-Obtiene la última solución enviada por un estudiante para un ejercicio específico.
 
 ---
 
-### 7. Soluciones - Gestión de soluciones de código
+## 📚 Exercise Management
 
-#### POST `/api/solutions/submit`
+### GET /api/exercises/student/{studentId}
+Obtiene todos los ejercicios asignados a un estudiante por ID.
 
-Permite a un estudiante enviar una solución de código para un ejercicio. La solución será evaluada automáticamente por Gemini AI.
-
-**Request Body (SolutionSubmissionDTO):**
-```json
-{
-  "exerciseId": "550e8400-e29b-41d4-a716-446655440001",
-  "studentEmail": "estudiante@ejemplo.com",
-  "code": "function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}"
-}
-```
-
-**Response (SolutionResponseDTO):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440002",
-  "code": "function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}",
-  "feedback": "Excelente implementación de la secuencia de Fibonacci usando recursión. El código es correcto y funcional. Para mejorar el rendimiento, podrías considerar usar programación dinámica o memoización para evitar cálculos repetidos.",
-  "grade": 4,
-  "submittedDate": "2025-07-09T14:30:00",
-  "evaluatedDate": "2025-07-09T14:30:15",
-  "exerciseId": "550e8400-e29b-41d4-a716-446655440001",
-  "exerciseContent": "Implementa una función que calcule el n-ésimo número de la secuencia de Fibonacci...",
-  "studentName": "Juan Pérez",
-  "studentEmail": "estudiante@ejemplo.com",
-  "isEvaluated": true
-}
-```
-
-#### GET `/api/solutions/student/email/{email}`
-
-Obtiene todas las soluciones enviadas por un estudiante específico.
+**Path Parameters:**
+- `studentId`: UUID del estudiante
 
 **Response:**
 ```json
 [
-  {
-    "id": "550e8400-e29b-41d4-a716-446655440002",
-    "code": "function fibonacci(n) {...}",
-    "feedback": "Excelente implementación...",
-    "grade": 4,
-    "submittedDate": "2025-07-09T14:30:00",
-    "evaluatedDate": "2025-07-09T14:30:15",
-    "exerciseId": "550e8400-e29b-41d4-a716-446655440001",
-    "exerciseContent": "Implementa una función...",
-    "studentName": "Juan Pérez",
-    "studentEmail": "estudiante@ejemplo.com",
-    "isEvaluated": true
-  }
+    {
+        "id": "b234c567-d890-1234-e567-f890a1234567",
+        "exerciseContent": "Crear una clase Calculator...",
+        "assignedDate": "2025-07-11T23:30:00",
+        "isCompleted": false,
+        "student": {
+            "id": "a123b456-c789-0123-d456-e789f0123456",
+            "fullName": "Ana López",
+            "email": "ana.lopez@email.com"
+        }
+    }
 ]
 ```
 
-#### GET `/api/solutions/exercise/{exerciseId}`
+### GET /api/exercises/student/email/{email}
+Obtiene todos los ejercicios asignados a un estudiante por email.
 
-Obtiene todas las soluciones enviadas para un ejercicio específico.
+**Path Parameters:**
+- `email`: Email del estudiante
 
-#### GET `/api/solutions/{solutionId}`
+**Response:** *(Mismo formato que el endpoint anterior)*
 
-Obtiene los detalles de una solución específica.
+### GET /api/exercises/pending
+Obtiene todos los ejercicios pendientes (no completados).
 
-#### GET `/api/solutions/unevaluated`
+**Response:**
+```json
+[
+    {
+        "id": "b234c567-d890-1234-e567-f890a1234567",
+        "exerciseContent": "Crear una clase Calculator...",
+        "assignedDate": "2025-07-11T23:30:00",
+        "isCompleted": false,
+        "student": {
+            "id": "a123b456-c789-0123-d456-e789f0123456",
+            "fullName": "Ana López",
+            "email": "ana.lopez@email.com"
+        }
+    }
+]
+```
 
-Obtiene todas las soluciones que aún no han sido evaluadas (útil para administradores).
+### PUT /api/exercises/{exerciseId}/complete
+Marca un ejercicio como completado.
 
-#### GET `/api/solutions/latest/exercise/{exerciseId}/student/{email}`
+**Path Parameters:**
+- `exerciseId`: UUID del ejercicio
 
-Obtiene la última solución enviada por un estudiante para un ejercicio específico.
+**Response:**
+```json
+{
+    "id": "b234c567-d890-1234-e567-f890a1234567",
+    "exerciseContent": "Crear una clase Calculator...",
+    "assignedDate": "2025-07-11T23:30:00",
+    "isCompleted": true,
+    "student": {
+        "id": "a123b456-c789-0123-d456-e789f0123456",
+        "fullName": "Ana López",
+        "email": "ana.lopez@email.com"
+    }
+}
+```
+
+### GET /api/exercises/{exerciseId}
+Obtiene un ejercicio específico por ID.
+
+**Path Parameters:**
+- `exerciseId`: UUID del ejercicio
+
+### GET /api/exercises/{exerciseId}/solutions
+Obtiene todas las soluciones de un ejercicio específico.
+
+**Path Parameters:**
+- `exerciseId`: UUID del ejercicio
+
+### GET /api/exercises/{exerciseId}/solutions/latest/student/{email}
+Obtiene la última solución de un estudiante para un ejercicio específico.
+
+**Path Parameters:**
+- `exerciseId`: UUID del ejercicio
+- `email`: Email del estudiante
 
 ---
 
-## Sistema de Evaluación Automática
+## 💻 Solution Management
 
-### Proceso de Evaluación
+### POST /api/solutions/submit
+Envía una solución de código Java. **Incluye validación automática con JDoodle.**
 
-1. **Envío de Código**: El estudiante envía su solución a través de `/api/solutions/submit`
-2. **Almacenamiento**: La solución se guarda inmediatamente en la base de datos
-3. **Evaluación con Gemini**: El código se envía a Gemini AI para evaluación automática
-4. **Análisis**: Gemini analiza:
-   - Corrección del código
-   - Calidad y mejores prácticas
-   - Solución del problema planteado
-5. **Feedback y Nota**: Se recibe feedback detallado y una nota del 1 al 5
-6. **Actualización**: La solución se actualiza con el feedback y la nota
+**Request Body:**
+```json
+{
+    "exerciseId": "b234c567-d890-1234-e567-f890a1234567",
+    "studentEmail": "ana.lopez@email.com",
+    "code": "public class Calculator {\n    public int sum(int a, int b) {\n        return a + b;\n    }\n}"
+}
+```
 
-### Criterios de Evaluación
+**Response (Éxito):**
+```json
+{
+    "id": "c345d678-e901-2345-f678-901a2345b678",
+    "code": "public class Calculator {\n    public int sum(int a, int b) {\n        return a + b;\n    }\n}",
+    "feedback": "Excelente implementación...",
+    "grade": 4.5,
+    "submittedDate": "2025-07-11T23:45:00",
+    "evaluatedDate": "2025-07-11T23:45:30",
+    "exerciseId": "b234c567-d890-1234-e567-f890a1234567",
+    "exerciseContent": "Crear una clase Calculator...",
+    "studentName": "Ana López",
+    "studentEmail": "ana.lopez@email.com",
+    "isEvaluated": true
+}
+```
 
-- **Nota 1**: Muy deficiente (no funciona o está muy mal)
-- **Nota 2**: Deficiente (funciona parcialmente con errores importantes)
-- **Nota 3**: Regular (funciona pero con errores menores o puede mejorar)
-- **Nota 4**: Bueno (funciona bien con algunas mejoras menores)
-- **Nota 5**: Excelente (funciona perfectamente y está bien escrito)
+**Response (Error de Compilación - HTTP 400):**
+```json
+{
+    "error": "COMPILATION_ERROR",
+    "message": "El código no compila correctamente",
+    "compilationError": "Main.java:3: error: ';' expected\n        int x = 5\n                 ^\n1 error",
+    "jdoodleOutput": "Main.java:3: error: ';' expected\n        int x = 5\n                 ^\n1 error"
+}
+```
+
+### GET /api/solutions/student/email/{email}
+Obtiene todas las soluciones de un estudiante por email.
+
+**Path Parameters:**
+- `email`: Email del estudiante
+
+### GET /api/solutions/exercise/{exerciseId}
+Obtiene todas las soluciones de un ejercicio específico.
+
+**Path Parameters:**
+- `exerciseId`: UUID del ejercicio
+
+### GET /api/solutions/{solutionId}
+Obtiene una solución específica por ID.
+
+**Path Parameters:**
+- `solutionId`: UUID de la solución
+
+### GET /api/solutions/unevaluated
+Obtiene todas las soluciones no evaluadas.
+
+**Response:**
+```json
+[
+    {
+        "id": "c345d678-e901-2345-f678-901a2345b678",
+        "code": "public class Calculator { ... }",
+        "feedback": null,
+        "grade": null,
+        "submittedDate": "2025-07-11T23:45:00",
+        "evaluatedDate": null,
+        "exerciseId": "b234c567-d890-1234-e567-f890a1234567",
+        "exerciseContent": "Crear una clase Calculator...",
+        "studentName": "Ana López",
+        "studentEmail": "ana.lopez@email.com",
+        "isEvaluated": false
+    }
+]
+```
+
+### GET /api/solutions/latest/exercise/{exerciseId}/student/{email}
+Obtiene la última solución de un estudiante para un ejercicio específico.
+
+**Path Parameters:**
+- `exerciseId`: UUID del ejercicio
+- `email`: Email del estudiante
 
 ---
 
-### Ejemplos con curl:
+## 🔧 JDoodle Integration (Code Validation)
 
-```bash
-# Enviar una solución
-curl -X POST http://localhost:8080/api/solutions/submit \
-  -H "Content-Type: application/json" \
-  -d '{
-    "exerciseId": "550e8400-e29b-41d4-a716-446655440001",
-    "studentEmail": "estudiante@ejemplo.com",
-    "code": "function fibonacci(n) { if (n <= 1) return n; return fibonacci(n-1) + fibonacci(n-2); }"
-  }'
+### POST /api/jdoodle/validate
+Valida y ejecuta código Java usando JDoodle.
 
-# Obtener soluciones de un estudiante
-curl -X GET http://localhost:8080/api/solutions/student/email/estudiante@ejemplo.com
+**Request Body:**
+```json
+{
+    "code": "public class Test {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}"
+}
+```
 
-# Obtener la última solución de un estudiante para un ejercicio
-curl -X GET http://localhost:8080/api/solutions/latest/exercise/550e8400-e29b-41d4-a716-446655440001/student/estudiante@ejemplo.com
+**Response:**
+```json
+{
+    "output": "Hello, World!",
+    "statusCode": 200,
+    "memory": "13556",
+    "cpuTime": "0.09",
+    "compilationStatus": null,
+    "isCompiled": true,
+    "error": null,
+    "projectKey": "abc123def456"
+}
+```
 
-# Obtener ejercicios de un estudiante
-curl -X GET http://localhost:8080/api/exercises/student/550e8400-e29b-41d4-a716-446655440000
+### POST /api/jdoodle/compile-only
+Solo compila código Java sin ejecutarlo (más rápido).
 
-# Obtener ejercicios pendientes
-curl -X GET http://localhost:8080/api/exercises/pending
+**Request Body:**
+```json
+{
+    "code": "public class Calculator {\n    public int sum(int a, int b) {\n        return a + b;\n    }\n}"
+}
+```
 
-# Marcar ejercicio como completado
-curl -X PUT http://localhost:8080/api/exercises/550e8400-e29b-41d4-a716-446655440001/complete
+**Response:**
+```json
+{
+    "output": "",
+    "statusCode": 200,
+    "memory": "0",
+    "cpuTime": "0.05",
+    "compilationStatus": "compiled successfully",
+    "isCompiled": true,
+    "error": null,
+    "projectKey": "def456ghi789"
+}
+```
+
+### GET /api/jdoodle/test
+Prueba la conectividad con JDoodle usando código de ejemplo.
+
+**Response:**
+```json
+{
+    "status": "success",
+    "message": "Conexión con JDoodle exitosa",
+    "isCompiled": true,
+    "output": "Hello, World!",
+    "statusCode": 200,
+    "cpuTime": "0.09",
+    "memory": "13556",
+    "compilationStatus": null,
+    "projectKey": "abc123def456"
+}
 ```
 
 ---
 
-## Comportamiento del Sistema
+## 📊 Data Models
 
-### Lógica de Sincronización
-
-1. **UUID existente por ID**: Si existe un estudiante con el mismo UUID de Supabase, se actualizan sus datos.
-
-2. **Email existente**: Si existe un estudiante con el mismo email pero diferente UUID, se actualiza el UUID con el de Supabase.
-
-3. **Estudiante nuevo**: Si no existe ni por UUID ni por email, se crea un nuevo registro.
-
-### Validaciones
-
-- **UUID obligatorio**: Todos los endpoints requieren un UUID válido de Supabase
-- **Email único**: Los emails deben ser únicos en la base de datos
-- **Campos requeridos**: `id`, `email` y `fullName` son obligatorios en `/sync-from-supabase`
-- **Relaciones**: Las soluciones deben estar asociadas a ejercicios y estudiantes válidos
-
----
-
-## Códigos de Respuesta
-
-| Código | Descripción |
-|--------|-------------|
-| `200 OK` | Operación exitosa |
-| `400 Bad Request` | Datos inválidos o faltantes |
-| `404 Not Found` | Recurso no encontrado |
-| `500 Internal Server Error` | Error interno del servidor |
-
----
-
-## Integración con Frontend
-
-### Flujo Completo Recomendado
-
-1. **Autenticación**: Usuario se autentica con Supabase
-2. **Obtener datos**: Frontend obtiene `user.id`, `user.email` y `user.user_metadata.full_name` de Supabase
-3. **Sincronización**: Enviar datos a `/api/student/sync-from-supabase`
-4. **Chat**: Usar los mismos datos para `/api/chat/send`
-5. **Consultar ejercicios**: Usar `/api/exercises/student/{studentId}` para ver historial
-6. **Enviar solución**: Usar `/api/solutions/submit` cuando el estudiante termine su código
-7. **Ver feedback**: Consultar la solución evaluada para ver el feedback y la nota
-8. **Completar ejercicio**: Usar `/api/exercises/{exerciseId}/complete` cuando se considere finalizado
-
-### Ejemplo de Integración JavaScript
-
-```javascript
-// Después de la autenticación con Supabase
-const { data: { user } } = await supabase.auth.getUser();
-
-const studentData = {
-  id: user.id,
-  email: user.email,
-  fullName: user.user_metadata.full_name
-};
-
-// 1. Sincronizar con backend
-await fetch('/api/student/sync-from-supabase', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(studentData)
-});
-
-// 2. Generar ejercicio (se guarda automáticamente)
-const exerciseResponse = await fetch('/api/chat/send', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(studentData)
-});
-
-const exerciseContent = await exerciseResponse.text();
-
-// 3. Obtener historial de ejercicios
-const exercisesResponse = await fetch(`/api/exercises/student/${user.id}`);
-const exercises = await exercisesResponse.json();
-
-// 4. Enviar solución de código
-const solutionData = {
-  exerciseId: exercises[0].id, // ID del ejercicio actual
-  studentEmail: user.email,
-  code: `function fibonacci(n) {
-    if (n <= 1) return n;
-    return fibonacci(n-1) + fibonacci(n-2);
-  }`
-};
-
-const solutionResponse = await fetch('/api/solutions/submit', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(solutionData)
-});
-
-const evaluatedSolution = await solutionResponse.json();
-console.log('Feedback:', evaluatedSolution.feedback);
-console.log('Nota:', evaluatedSolution.grade);
-
-// 5. Obtener todas las soluciones del estudiante
-const solutionsResponse = await fetch(`/api/solutions/student/email/${user.email}`);
-const allSolutions = await solutionsResponse.json();
-
-// 6. Marcar ejercicio como completado (cuando el usuario termine)
-// await fetch(`/api/exercises/${exerciseId}/complete`, { method: 'PUT' });
+### Student
+```json
+{
+    "id": "UUID - Generated by Supabase",
+    "fullName": "string",
+    "email": "string (unique)",
+    "version": "long - Optimistic locking"
+}
 ```
+
+### Exercise
+```json
+{
+    "id": "UUID - Auto-generated",
+    "exerciseContent": "string - Exercise description/requirements",
+    "assignedDate": "LocalDateTime - Auto-set on creation",
+    "isCompleted": "boolean - Default: false",
+    "student": "Student object"
+}
+```
+
+### Solution
+```json
+{
+    "id": "UUID - Auto-generated",
+    "code": "string - Java code submitted",
+    "feedback": "string - AI evaluation feedback",
+    "grade": "double - Grade from 0 to 5",
+    "submittedDate": "LocalDateTime - Auto-set on creation",
+    "evaluatedDate": "LocalDateTime - Set when evaluated",
+    "exercise": "Exercise object",
+    "student": "Student object",
+    "isEvaluated": "boolean - Default: false"
+}
+```
+
+---
+
+## 🚨 Error Handling
+
+### Global Exception Handler
+La API maneja automáticamente varios tipos de errores:
+
+#### Compilation Errors (HTTP 400)
+```json
+{
+    "error": "COMPILATION_ERROR",
+    "message": "El código no compila correctamente",
+    "compilationError": "Error details from JDoodle",
+    "jdoodleOutput": "Full compilation output"
+}
+```
+
+#### Optimistic Locking Errors (HTTP 409)
+```json
+{
+    "error": "CONCURRENT_MODIFICATION",
+    "message": "Los datos fueron modificados por otra transacción. Por favor, actualice los datos e intente nuevamente.",
+    "details": "Technical error details"
+}
+```
+
+#### General Server Errors (HTTP 500)
+```json
+{
+    "error": "INTERNAL_SERVER_ERROR",
+    "message": "Ha ocurrido un error interno del servidor.",
+    "details": "Technical error details"
+}
+```
+
+#### Submission Errors (HTTP 400)
+```json
+{
+    "error": "SUBMISSION_ERROR",
+    "message": "Specific error message"
+}
+```
+
+---
+
+## 🔄 Workflow Integration
+
+### Complete Learning Flow
+1. **Student Registration**: `POST /api/student/create`
+2. **Exercise Generation**: `POST /api/chat/send`
+3. **Code Submission**: `POST /api/solutions/submit`
+   - ✅ **Automatic JDoodle validation**
+   - ✅ **Automatic Gemini AI evaluation**
+4. **Progress Tracking**: `GET /api/exercises/student/email/{email}`
+
+### AI Integration Features
+- **Gemini AI**: Exercise generation and code evaluation
+- **JDoodle**: Real-time code compilation validation
+- **Automatic Feedback**: Grade and detailed feedback generation
+
+### Security & Performance
+- **Optimistic Locking**: Prevents concurrent modification conflicts
+- **CORS Enabled**: Cross-origin requests supported
+- **Input Validation**: Comprehensive request validation
+- **Error Handling**: Detailed error responses for debugging
+
+---
+
+## 📝 Notes
+
+- All UUIDs are generated automatically except for Student ID (comes from Supabase)
+- Timestamps are managed automatically by JPA lifecycle hooks
+- Code validation with JDoodle happens before database storage
+- AI evaluation with Gemini happens after successful code validation
+- The system uses compile-only validation for efficiency in solution submission
