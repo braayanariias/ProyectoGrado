@@ -11,8 +11,7 @@ USE proyecto;
 CREATE TABLE IF NOT EXISTS students (
     id VARCHAR(36) PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
-    full_name VARCHAR(255) NOT NULL,
-    version BIGINT DEFAULT 0
+    full_name VARCHAR(255) NOT NULL
 );
 
 -- Crear la tabla exercises si no existe

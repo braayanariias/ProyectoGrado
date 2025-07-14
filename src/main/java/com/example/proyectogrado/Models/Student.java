@@ -24,9 +24,6 @@ public class Student {
     @Column(unique = true)
     private String email;
 
-    @Version
-    private Long version;
-
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonBackReference
     private List<Exercise> exercises;
