@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class ChatRequest {
 
     private String message;
-
-    //El id del estudiante sera el codigo de carnet
     private String studentId;
+    
 }
