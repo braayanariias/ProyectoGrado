@@ -1,7 +1,13 @@
 package com.example.proyectogrado.Models.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class JDoodleRequestDTO {
     
     @JsonProperty("clientId")
@@ -25,9 +31,7 @@ public class JDoodleRequestDTO {
     @JsonProperty("compileOnly")
     private boolean compileOnly;
 
-    // Constructores
-    public JDoodleRequestDTO() {}
-
+    // Constructor personalizado para casos comunes
     public JDoodleRequestDTO(String clientId, String clientSecret, String script, String language, String versionIndex) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -45,63 +49,6 @@ public class JDoodleRequestDTO {
         this.language = language;
         this.versionIndex = versionIndex;
         this.stdin = "";
-        this.compileOnly = compileOnly;
-    }
-
-    // Getters y Setters
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public String getVersionIndex() {
-        return versionIndex;
-    }
-
-    public void setVersionIndex(String versionIndex) {
-        this.versionIndex = versionIndex;
-    }
-
-    public String getStdin() {
-        return stdin;
-    }
-
-    public void setStdin(String stdin) {
-        this.stdin = stdin;
-    }
-
-    public boolean isCompileOnly() {
-        return compileOnly;
-    }
-
-    public void setCompileOnly(boolean compileOnly) {
         this.compileOnly = compileOnly;
     }
 }
