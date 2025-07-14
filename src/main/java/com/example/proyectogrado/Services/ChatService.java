@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,6 @@ import java.util.Map;
 public class ChatService {
 
     private final WebClient webClient;
-    private final List<ChatMessage> conversationHistory = new ArrayList<>();
     private final Prompt prompt = new Prompt();
     private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -45,18 +43,17 @@ public class ChatService {
         // Guardar el estudiante en la base de datos
         studentService.saveStudent(student);
         
-        // Agregar mensaje del usuario al historial
+        // Crear el mensaje del usuario
         ChatMessage.Part part = new ChatMessage.Part();
         part.setText(prompt.getPrompt());
 
-        // Crear el mensaje del usuario
         ChatMessage userChatMessage = new ChatMessage();
         userChatMessage.setRole("user");
         userChatMessage.setParts(List.of(part));
 
-        // Agregar el mensaje del usuario al historial
-        conversationHistory.add(userChatMessage);
-        Map<String, Object> requestBody = Map.of("contents", conversationHistory);
+        // Crear una conversación temporal solo para esta consulta
+        List<ChatMessage> tempConversation = List.of(userChatMessage);
+        Map<String, Object> requestBody = Map.of("contents", tempConversation);
         try {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
