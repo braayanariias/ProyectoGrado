@@ -101,16 +101,4 @@ public class ExerciseController {
         List<SolutionResponseDTO> solutions = solutionService.getSolutionsByExerciseId(exerciseId);
         return ResponseEntity.ok(solutions);
     }
-
-    @GetMapping("/{exerciseId}/solutions/latest/student/{email}")
-    public ResponseEntity<SolutionResponseDTO> getLatestSolutionForExercise(
-            @PathVariable UUID exerciseId,
-            @PathVariable String email) {
-        Optional<SolutionResponseDTO> solution = solutionService.getLatestSolutionByExerciseAndStudent(exerciseId, email);
-        if (solution.isPresent()) {
-            return ResponseEntity.ok(solution.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }

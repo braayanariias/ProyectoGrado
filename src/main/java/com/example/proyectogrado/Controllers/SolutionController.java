@@ -83,22 +83,4 @@ public class SolutionController {
             return ResponseEntity.notFound().build();
         }
     }
-
-    @GetMapping("/unevaluated")
-    public ResponseEntity<List<SolutionResponseDTO>> getUnevaluatedSolutions() {
-        List<SolutionResponseDTO> solutions = solutionService.getUnevaluatedSolutions();
-        return ResponseEntity.ok(solutions);
-    }
-
-    @GetMapping("/latest/exercise/{exerciseId}/student/{email}")
-    public ResponseEntity<SolutionResponseDTO> getLatestSolutionByExerciseAndStudent(
-            @PathVariable UUID exerciseId, 
-            @PathVariable String email) {
-        Optional<SolutionResponseDTO> solution = solutionService.getLatestSolutionByExerciseAndStudent(exerciseId, email);
-        if (solution.isPresent()) {
-            return ResponseEntity.ok(solution.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }

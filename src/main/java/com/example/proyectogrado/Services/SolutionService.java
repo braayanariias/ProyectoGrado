@@ -193,30 +193,6 @@ public class SolutionService {
         return solution.map(this::convertToResponseDTO);
     }
 
-    public List<SolutionResponseDTO> getUnevaluatedSolutions() {
-        List<Solution> solutions = solutionRepository.findByIsEvaluated(false);
-        return solutions.stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<SolutionResponseDTO> getLatestSolutionByExerciseAndStudent(UUID exerciseId, String studentEmail) {
-        Student student = studentService.findByEmail(studentEmail);
-        if (student == null) {
-            return Optional.empty();
-        }
-
-        Optional<Exercise> exerciseOpt = exerciseService.getExerciseById(exerciseId);
-        if (exerciseOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Optional<Solution> solution = solutionRepository.findFirstByExerciseAndStudentOrderBySubmittedDateDesc(
-                exerciseOpt.get(), student);
-        
-        return solution.map(this::convertToResponseDTO);
-    }
-
     private SolutionResponseDTO convertToResponseDTO(Solution solution) {
         SolutionResponseDTO dto = new SolutionResponseDTO();
         dto.setId(solution.getId());
