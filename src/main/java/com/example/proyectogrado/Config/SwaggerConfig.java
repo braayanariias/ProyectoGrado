@@ -24,8 +24,8 @@ public class SwaggerConfig {
         prodServer.setDescription("Servidor de producción");
 
         Contact contact = new Contact();
-        contact.setEmail("braayanariias@gmail.com");
-        contact.setName("Braayan Arias");
+        contact.setEmail("arias.brayan897@gmail.com");
+        contact.setName("Brayan Arias");
 
         License mitLicense = new License()
                 .name("MIT License")
