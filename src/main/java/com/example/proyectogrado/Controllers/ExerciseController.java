@@ -9,6 +9,12 @@ import com.example.proyectogrado.Services.SolutionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/exercises")
 @CrossOrigin(origins = "*")
+@Tag(name = "Exercise", description = "API para gestión de ejercicios de programación")
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
@@ -29,13 +36,27 @@ public class ExerciseController {
     }
 
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<Exercise>> getExercisesByStudentId(@PathVariable UUID studentId) {
+    @Operation(summary = "Obtener ejercicios por ID de estudiante", 
+              description = "Retorna todos los ejercicios asignados a un estudiante específico")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de ejercicios encontrada"),
+        @ApiResponse(responseCode = "404", description = "Estudiante no encontrado")
+    })
+    public ResponseEntity<List<Exercise>> getExercisesByStudentId(
+            @Parameter(description = "ID único del estudiante") @PathVariable UUID studentId) {
         List<Exercise> exercises = exerciseService.getExercisesByStudentId(studentId);
         return ResponseEntity.ok(exercises);
     }
 
     @GetMapping("/student/email/{email}")
-    public ResponseEntity<List<Exercise>> getExercisesByStudentEmail(@PathVariable String email) {
+    @Operation(summary = "Obtener ejercicios por email de estudiante", 
+              description = "Retorna todos los ejercicios asignados a un estudiante usando su email")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de ejercicios encontrada"),
+        @ApiResponse(responseCode = "404", description = "Estudiante no encontrado")
+    })
+    public ResponseEntity<List<Exercise>> getExercisesByStudentEmail(
+            @Parameter(description = "Email del estudiante") @PathVariable String email) {
         Student student = studentService.findByEmail(email);
         if (student == null) {
             return ResponseEntity.notFound().build();
@@ -45,6 +66,11 @@ public class ExerciseController {
     }
 
     @GetMapping("/pending")
+    @Operation(summary = "Obtener ejercicios pendientes", 
+              description = "Retorna todos los ejercicios que están pendientes de resolución")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de ejercicios pendientes")
+    })
     public ResponseEntity<List<Exercise>> getPendingExercises() {
         List<Exercise> exercises = exerciseService.getPendingExercises();
         return ResponseEntity.ok(exercises);

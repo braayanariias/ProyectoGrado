@@ -7,6 +7,12 @@ import com.example.proyectogrado.Services.SolutionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/solutions")
 @CrossOrigin(origins = "*")
+@Tag(name = "Solution", description = "API para gestión de soluciones de ejercicios")
 public class SolutionController {
 
     private final SolutionService solutionService;
@@ -25,6 +32,13 @@ public class SolutionController {
     }
 
     @PostMapping("/submit")
+    @Operation(summary = "Enviar solución", 
+              description = "Envía una solución de código para ser evaluada y compilada")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Solución procesada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Error de compilación o datos inválidos"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     public ResponseEntity<?> submitSolution(@RequestBody SolutionSubmissionDTO submissionDTO) {
         try {
             SolutionResponseDTO response = solutionService.submitSolution(submissionDTO);
@@ -42,7 +56,14 @@ public class SolutionController {
     }
 
     @GetMapping("/student/email/{email}")
-    public ResponseEntity<List<SolutionResponseDTO>> getSolutionsByStudentEmail(@PathVariable String email) {
+    @Operation(summary = "Obtener soluciones por email", 
+              description = "Retorna todas las soluciones enviadas por un estudiante usando su email")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de soluciones encontrada"),
+        @ApiResponse(responseCode = "404", description = "Estudiante no encontrado")
+    })
+    public ResponseEntity<List<SolutionResponseDTO>> getSolutionsByStudentEmail(
+            @Parameter(description = "Email del estudiante") @PathVariable String email) {
         List<SolutionResponseDTO> solutions = solutionService.getSolutionsByStudentEmail(email);
         return ResponseEntity.ok(solutions);
     }
