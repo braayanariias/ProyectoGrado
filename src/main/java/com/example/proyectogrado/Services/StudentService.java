@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Repositorys.StudentRepository;
 
 @Service
@@ -47,6 +48,17 @@ public class StudentService {
         
         // Si no existe, crear uno nuevo con el UUID de Supabase
         return studentRepository.save(student);
+    }
+    
+    // Método sobrecargado para recibir StudentDTO (recomendado para operaciones desde frontend)
+    public Student saveStudent(StudentDTO studentDTO) {
+        Student student = new Student();
+        student.setId(studentDTO.getId());
+        student.setFullName(studentDTO.getFullName());
+        student.setEmail(studentDTO.getEmail());
+        // No seteamos exercises ya que será null (lazy loading las traerá cuando sea necesario)
+        
+        return saveStudent(student); // Reutiliza la lógica existente
     }
     
     public Student findByEmail(String email) {

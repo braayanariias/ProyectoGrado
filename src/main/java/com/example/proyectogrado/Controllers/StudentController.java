@@ -38,23 +38,10 @@ public class StudentController {
         @ApiResponse(responseCode = "200", description = "Estudiante guardado exitosamente"),
         @ApiResponse(responseCode = "400", description = "Datos del estudiante inválidos")
     })
-    public Student saveStudent(@RequestBody Student student) {
-        return studentService.saveStudent(student);
+    public Student saveStudent(@RequestBody StudentDTO studentDTO) {
+        return studentService.saveStudent(studentDTO);
     }
-    
-    @PostMapping("/create")
-    @Operation(summary = "Crear estudiante", description = "Crea un nuevo estudiante usando un DTO")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Estudiante creado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos del DTO inválidos")
-    })
-    public Student createStudent(@RequestBody StudentDTO studentDTO) {
-        Student student = new Student();
-        student.setId(studentDTO.getId()); // UUID de Supabase
-        student.setFullName(studentDTO.getFullName());
-        student.setEmail(studentDTO.getEmail());
-        return studentService.saveStudent(student);
-    }
+
     
     @PutMapping("/update/{id}")
     @Operation(summary = "Actualizar estudiante", description = "Actualiza los datos de un estudiante por su ID")
@@ -66,28 +53,10 @@ public class StudentController {
     public ResponseEntity<Student> updateStudent(
             @Parameter(description = "ID del estudiante a actualizar") @PathVariable UUID id, 
             @RequestBody StudentDTO studentDTO) {
-        Student student = new Student();
-        student.setId(id);
-        student.setFullName(studentDTO.getFullName());
-        student.setEmail(studentDTO.getEmail());
-        Student updatedStudent = studentService.saveStudent(student);
+        // Asegurar que el DTO tenga el ID correcto
+        studentDTO.setId(id);
+        Student updatedStudent = studentService.saveStudent(studentDTO);
         return ResponseEntity.ok(updatedStudent);
-    }
-    
-    @PostMapping("/sync-from-supabase")
-    public ResponseEntity<Student> syncStudentFromSupabase(@RequestBody StudentDTO studentDTO) {
-        // Validar que el DTO tenga todos los campos requeridos
-        if (studentDTO.getId() == null || studentDTO.getEmail() == null || studentDTO.getFullName() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        Student student = new Student();
-        student.setId(studentDTO.getId()); // UUID generado por Supabase
-        student.setFullName(studentDTO.getFullName());
-        student.setEmail(studentDTO.getEmail());
-        
-        Student savedStudent = studentService.saveStudent(student);
-        return ResponseEntity.ok(savedStudent);
     }
     
 }
