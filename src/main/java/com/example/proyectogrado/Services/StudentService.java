@@ -28,7 +28,7 @@ public class StudentService {
         // Verificar si ya existe por ID (UUID de Supabase)
         Optional<Student> existingById = studentRepository.findById(student.getId());
         if (existingById.isPresent()) {
-            // Si existe por ID, actualizar la información
+            // Si existe por ID, actualizar la información y retornar como exitoso
             Student existing = existingById.get();
             existing.setFullName(student.getFullName());
             existing.setEmail(student.getEmail());
@@ -56,8 +56,6 @@ public class StudentService {
         student.setId(studentDTO.getId());
         student.setFullName(studentDTO.getFullName());
         student.setEmail(studentDTO.getEmail());
-        // No seteamos exercises ya que será null (lazy loading las traerá cuando sea necesario)
-        
         return saveStudent(student); // Reutiliza la lógica existente
     }
     
