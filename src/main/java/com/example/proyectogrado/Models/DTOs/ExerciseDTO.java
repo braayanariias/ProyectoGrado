@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExerciseDTO {
     
-    private UUID id;
+    private UUID exerciseId;
     private String exerciseContent;
     private LocalDateTime assignedDate;
     private Boolean isCompleted;

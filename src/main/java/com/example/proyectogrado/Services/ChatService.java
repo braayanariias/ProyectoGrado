@@ -40,9 +40,6 @@ public class ChatService {
 
     // Envía el mensaje al modelo de IA y devuelve la respuesta
     public Mono<ExerciseResponseDTO> sendMessage(Student student) {
-        // Guardar el estudiante en la base de datos
-        studentService.saveStudent(student);
-        
         // Crear el mensaje del usuario
         ChatMessage.Part part = new ChatMessage.Part();
         part.setText(prompt.getPrompt());
@@ -68,7 +65,7 @@ public class ChatService {
                         // Guardar el ejercicio en la base de datos relacionado con el estudiante
                         Exercise savedExercise = exerciseService.createAndSaveExercise(exerciseContent, student);
                         // Devolver tanto el ID como el contenido del ejercicio
-                        return new ExerciseResponseDTO(savedExercise.getId(), exerciseContent);
+                        return new ExerciseResponseDTO(savedExercise.getExerciseId(), exerciseContent);
                     });
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Error al generar el JSON del request", e));

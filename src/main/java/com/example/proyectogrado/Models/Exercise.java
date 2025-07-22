@@ -18,7 +18,7 @@ public class Exercise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID exerciseId;
 
     @Column(columnDefinition = "TEXT")
     private String exerciseContent;

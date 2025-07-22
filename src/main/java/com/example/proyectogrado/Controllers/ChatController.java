@@ -14,9 +14,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/api/chat")
+@CrossOrigin(origins = "*")
 @Tag(name = "Chat", description = "API para interacción con el sistema de chat IA")
 public class ChatController {
 

@@ -85,7 +85,7 @@ public class SolutionService {
         Solution savedSolution = solutionRepository.save(solution);
 
         // Marcar el ejercicio como completado
-        exerciseService.markAsCompleted(exercise.getId());
+        exerciseService.markAsCompleted(exercise.getExerciseId());
 
         // Evaluar el código con Gemini
         try {
@@ -195,7 +195,7 @@ public class SolutionService {
 
     private SolutionResponseDTO convertToResponseDTO(Solution solution) {
         SolutionResponseDTO dto = new SolutionResponseDTO();
-        dto.setId(solution.getId());
+        dto.setSolutionId(solution.getSolutionId());
         dto.setCode(solution.getCode());
         dto.setFeedback(solution.getFeedback());
         dto.setGrade(solution.getGrade());
@@ -204,7 +204,7 @@ public class SolutionService {
         dto.setIsEvaluated(solution.getIsEvaluated());
         
         if (solution.getExercise() != null) {
-            dto.setExerciseId(solution.getExercise().getId());
+            dto.setExerciseId(solution.getExercise().getExerciseId());
             dto.setExerciseContent(solution.getExercise().getExerciseContent());
         }
         

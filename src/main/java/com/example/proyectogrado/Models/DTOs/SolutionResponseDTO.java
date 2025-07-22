@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SolutionResponseDTO {
-    private UUID id;
+    private UUID solutionId;
     private String code;
     private String feedback;
     private Double grade;

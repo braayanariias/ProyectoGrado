@@ -18,7 +18,7 @@ public class Solution {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID solutionId;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String code;
@@ -36,7 +36,7 @@ public class Solution {
     private LocalDateTime evaluatedDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "exercise_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "exercise_id", referencedColumnName = "exerciseId", nullable = false)
     @JsonManagedReference
     private Exercise exercise;
 

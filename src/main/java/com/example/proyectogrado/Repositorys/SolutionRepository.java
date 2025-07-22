@@ -17,7 +17,8 @@ public interface SolutionRepository extends JpaRepository<Solution, UUID> {
     
     List<Solution> findByStudentId(UUID studentId);
     
-    List<Solution> findByExerciseId(UUID exerciseId);
+    @Query("SELECT s FROM Solution s WHERE s.exercise.exerciseId = :exerciseId")
+    List<Solution> findByExerciseId(@Param("exerciseId") UUID exerciseId);
     
     List<Solution> findByStudentAndExercise(Student student, Exercise exercise);
     
@@ -26,7 +27,7 @@ public interface SolutionRepository extends JpaRepository<Solution, UUID> {
     
     List<Solution> findByIsEvaluated(Boolean isEvaluated);
     
-    @Query("SELECT s FROM Solution s WHERE s.exercise.id = :exerciseId AND s.student.id = :studentId ORDER BY s.submittedDate DESC")
+    @Query("SELECT s FROM Solution s WHERE s.exercise.exerciseId = :exerciseId AND s.student.id = :studentId ORDER BY s.submittedDate DESC")
     List<Solution> findByExerciseAndStudentOrderBySubmittedDateDesc(@Param("exerciseId") UUID exerciseId, @Param("studentId") UUID studentId);
     
     Optional<Solution> findFirstByExerciseAndStudentOrderBySubmittedDateDesc(Exercise exercise, Student student);
