@@ -4,6 +4,7 @@ import com.example.proyectogrado.Models.Student;
 import com.example.proyectogrado.Models.DTOs.ExerciseResponseDTO;
 import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Services.ChatService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +43,6 @@ public class ChatController {
         student.setId(studentDTO.getId()); // UUID de Supabase
         student.setFullName(studentDTO.getFullName());
         student.setEmail(studentDTO.getEmail());
-        
         return chatService.sendMessage(student);
     }
 

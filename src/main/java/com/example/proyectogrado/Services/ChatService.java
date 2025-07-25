@@ -23,7 +23,6 @@ public class ChatService {
     private final Prompt prompt = new Prompt();
     private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-    private final StudentService studentService;
     private final ExerciseService exerciseService;
 
     public ChatService(
@@ -34,7 +33,6 @@ public class ChatService {
             ExerciseService exerciseService) {
         this.API_KEY = apiKey;
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
-        this.studentService = studentService;
         this.exerciseService = exerciseService;
     }
 
