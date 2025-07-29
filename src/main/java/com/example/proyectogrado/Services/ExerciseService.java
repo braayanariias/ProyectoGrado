@@ -2,6 +2,7 @@ package com.example.proyectogrado.Services;
 
 import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Repositorys.ExerciseRepository;
 import com.example.proyectogrado.Repositorys.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -46,8 +47,14 @@ public class ExerciseService {
         return exerciseRepository.findByStudentIdOrderByAssignedDateDesc(studentId);
     }
     
-    public List<Exercise> getPendingExercises() {
-        return exerciseRepository.findByIsCompletedFalse();
+    public List<Exercise> getPendingExercisesByStudent(StudentDTO studentDto) {
+        // Retorna todos los ejercicios que están pendientes de resolución por estudiante
+        Optional<Student> student = studentRepository.findByEmail(studentDto.getEmail());
+        if (student.isPresent()) {
+            return exerciseRepository.findByIsCompletedFalseAndStudent(student.get());
+        } else {
+            throw new RuntimeException("Student not found with email: " + studentDto.getEmail());
+        }
     }
     
     public Exercise markAsCompleted(UUID exerciseId) {

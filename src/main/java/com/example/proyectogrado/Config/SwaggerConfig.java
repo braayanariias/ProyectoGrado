@@ -19,10 +19,6 @@ public class SwaggerConfig {
         devServer.setUrl("http://localhost:8080");
         devServer.setDescription("Servidor de desarrollo");
 
-        Server prodServer = new Server();
-        prodServer.setUrl("https://tu-app.railway.app");
-        prodServer.setDescription("Servidor de producción");
-
         Contact contact = new Contact();
         contact.setEmail("arias.brayan897@gmail.com");
         contact.setName("Brayan Arias");
@@ -42,6 +38,6 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(devServer, prodServer));
+                .servers(List.of(devServer));
     }
 }

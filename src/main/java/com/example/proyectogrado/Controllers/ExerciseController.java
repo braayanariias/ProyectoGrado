@@ -3,6 +3,7 @@ package com.example.proyectogrado.Controllers;
 import com.example.proyectogrado.Models.Exercise;
 import com.example.proyectogrado.Models.Student;
 import com.example.proyectogrado.Models.DTOs.SolutionResponseDTO;
+import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Services.ExerciseService;
 import com.example.proyectogrado.Services.StudentService;
 import com.example.proyectogrado.Services.SolutionService;
@@ -65,14 +66,14 @@ public class ExerciseController {
         return ResponseEntity.ok(exercises);
     }
 
-    @GetMapping("/pending")
+    @PostMapping("/pending")
     @Operation(summary = "Obtener ejercicios pendientes", 
               description = "Retorna todos los ejercicios que están pendientes de resolución")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista de ejercicios pendientes")
+        @ApiResponse(responseCode = "200", description = "Lista de ejercicios pendientes por estudiante")
     })
-    public ResponseEntity<List<Exercise>> getPendingExercises() {
-        List<Exercise> exercises = exerciseService.getPendingExercises();
+    public ResponseEntity<List<Exercise>> getPendingExercises(@RequestBody StudentDTO studentDto) {
+        List<Exercise> exercises = exerciseService.getPendingExercisesByStudent(studentDto);
         return ResponseEntity.ok(exercises);
     }
 

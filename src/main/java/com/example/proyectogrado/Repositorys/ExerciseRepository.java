@@ -16,4 +16,8 @@ public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
     List<Exercise> findByStudentIdOrderByAssignedDateDesc(UUID studentId);
     
     List<Exercise> findByIsCompletedFalse();
+
+    //Obtener ejercicios pendientes por estudiante
+    List<Exercise> findByIsCompletedFalseAndStudent(Student student);
+
 }
