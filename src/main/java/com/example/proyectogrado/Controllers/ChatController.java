@@ -5,17 +5,13 @@ import com.example.proyectogrado.Models.DTOs.ExerciseResponseDTO;
 import com.example.proyectogrado.Models.DTOs.StudentDTO;
 import com.example.proyectogrado.Services.ChatService;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -44,6 +40,21 @@ public class ChatController {
         student.setFullName(studentDTO.getFullName());
         student.setEmail(studentDTO.getEmail());
         return chatService.sendMessage(student);
+    }
+
+    @PostMapping("/send/{theme}")
+    @Operation(summary = "Enviar mensaje al chat para ejercicio por tema",
+                description = "Envía información del estudiante al chat IA para generar un ejercicio ajustado al tema especificado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Ejercicio por tema generado exitosamente")
+    })
+    public Mono<ExerciseResponseDTO> sendThemeExercise(@RequestBody StudentDTO studentDTO, @PathVariable String theme) {
+        // Convertir DTO a entidad Student
+        Student student = new Student();
+        student.setId(studentDTO.getId()); // UUID de Supabase
+        student.setFullName(studentDTO.getFullName());
+        student.setEmail(studentDTO.getEmail());
+        return chatService.sendMessageTheme(student, theme);
     }
 
 }

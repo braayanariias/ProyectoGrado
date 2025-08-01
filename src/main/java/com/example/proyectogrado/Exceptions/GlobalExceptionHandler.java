@@ -19,7 +19,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleOptimisticLockingFailure(OptimisticLockingFailureException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "CONCURRENT_MODIFICATION");
-        errorResponse.put("message", "Los datos fueron modificados por otra transacción. Por favor, actualice los datos e intente nuevamente.");
+        errorResponse.put("message",
+                "Los datos fueron modificados por otra transacción. Por favor, actualice los datos e intente nuevamente.");
         errorResponse.put("details", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
@@ -28,7 +29,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleOptimisticLockException(OptimisticLockException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "CONCURRENT_MODIFICATION");
-        errorResponse.put("message", "Los datos fueron modificados por otra transacción. Por favor, actualice los datos e intente nuevamente.");
+        errorResponse.put("message",
+                "Los datos fueron modificados por otra transacción. Por favor, actualice los datos e intente nuevamente.");
         errorResponse.put("details", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
@@ -37,7 +39,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleStaleObjectState(StaleObjectStateException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "STALE_OBJECT_STATE");
-        errorResponse.put("message", "El objeto fue actualizado o eliminado por otra transacción. Por favor, refresque los datos e intente nuevamente.");
+        errorResponse.put("message",
+                "El objeto fue actualizado o eliminado por otra transacción. Por favor, refresque los datos e intente nuevamente.");
         errorResponse.put("details", ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }

@@ -1,9 +1,6 @@
 package com.example.proyectogrado.Services;
 
-import com.example.proyectogrado.Models.ChatMessage;
-import com.example.proyectogrado.Models.Exercise;
-import com.example.proyectogrado.Models.Prompt;
-import com.example.proyectogrado.Models.Student;
+import com.example.proyectogrado.Models.*;
 import com.example.proyectogrado.Models.DTOs.ExerciseResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +38,44 @@ public class ChatService {
         // Crear el mensaje del usuario
         ChatMessage.Part part = new ChatMessage.Part();
         part.setText(prompt.getPrompt());
+
+        ChatMessage userChatMessage = new ChatMessage();
+        userChatMessage.setRole("user");
+        userChatMessage.setParts(List.of(part));
+
+        // Crear una conversación temporal solo para esta consulta
+        List<ChatMessage> tempConversation = List.of(userChatMessage);
+        Map<String, Object> requestBody = Map.of("contents", tempConversation);
+        try {
+            String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+
+            return webClient.post()
+                    .uri("/gemini-2.0-flash:generateContent?key=" + API_KEY)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestBodyJson)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(response -> {
+                        String exerciseContent = extractMessage(response);
+                        // Guardar el ejercicio en la base de datos relacionado con el estudiante
+                        Exercise savedExercise = exerciseService.createAndSaveExercise(exerciseContent, student);
+                        // Devolver tanto el ID como el contenido del ejercicio
+                        return new ExerciseResponseDTO(savedExercise.getExerciseId(), exerciseContent);
+                    });
+        } catch (Exception e) {
+            return Mono.error(new RuntimeException("Error al generar el JSON del request", e));
+        }
+    }
+
+    // Envía el mensaje al modelo de IA y devuelve la respuesta
+    public Mono<ExerciseResponseDTO> sendMessageTheme(Student student, String theme) {
+        // Crear el mensaje del usuario
+        ChatMessage.Part part = new ChatMessage.Part();
+        if ("variables".equalsIgnoreCase(theme)) {
+            part.setText(new PromptThemeVariables().getPrompt());
+        } else {
+            part.setText(prompt.getPrompt());
+        }
 
         ChatMessage userChatMessage = new ChatMessage();
         userChatMessage.setRole("user");

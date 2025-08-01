@@ -3,6 +3,7 @@ package com.example.proyectogrado.Controllers;
 import com.example.proyectogrado.Models.DTOs.SolutionSubmissionDTO;
 import com.example.proyectogrado.Models.DTOs.SolutionResponseDTO;
 import com.example.proyectogrado.Exceptions.CodeCompilationException;
+import com.example.proyectogrado.Models.Solution;
 import com.example.proyectogrado.Services.SolutionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,5 +83,11 @@ public class SolutionController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/solutions/{exerciseId}/{studentId}")
+    public List<Solution> getSolutionsByExerciseAndStudent(
+            @PathVariable UUID exerciseId, @PathVariable UUID studentId) {
+        return solutionService.getSolutionsByExerciseIdAndStudentId(exerciseId, studentId);
     }
 }

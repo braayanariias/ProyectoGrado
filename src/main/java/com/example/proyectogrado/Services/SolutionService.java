@@ -182,7 +182,7 @@ public class SolutionService {
     }
 
     public List<SolutionResponseDTO> getSolutionsByExerciseId(UUID exerciseId) {
-        List<Solution> solutions = solutionRepository.findByExerciseId(exerciseId);
+        List<Solution> solutions = solutionRepository.findSolutionsByExerciseId(exerciseId);
         return solutions.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
@@ -215,4 +215,9 @@ public class SolutionService {
         
         return dto;
     }
+
+    public List<Solution> getSolutionsByExerciseIdAndStudentId(UUID exerciseId, UUID studentId) {
+        return solutionRepository.findSolutionsByExercise_ExerciseIdAndStudent_Id(exerciseId, studentId);
+    }
+
 }

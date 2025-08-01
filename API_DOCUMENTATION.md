@@ -22,8 +22,8 @@ Guarda un estudiante en la base de datos.
 ```json
 {
     "id": "a123b456-c789-0123-d456-e789f0123456",
-    "fullName": "Juan Pérez",
-    "email": "juan.perez@email.com"
+    "fullName": "string",
+    "email": "string"
 }
 ```
 
@@ -31,31 +31,8 @@ Guarda un estudiante en la base de datos.
 ```json
 {
     "id": "a123b456-c789-0123-d456-e789f0123456",
-    "fullName": "Juan Pérez",
-    "email": "juan.perez@email.com",
-    "version": 0
-}
-```
-
-### POST /api/student/create
-Crea un nuevo estudiante usando DTO.
-
-**Request Body:**
-```json
-{
-    "id": "a123b456-c789-0123-d456-e789f0123456",
-    "fullName": "María García",
-    "email": "maria.garcia@email.com"
-}
-```
-
-**Response:**
-```json
-{
-    "id": "a123b456-c789-0123-d456-e789f0123456",
-    "fullName": "María García",
-    "email": "maria.garcia@email.com",
-    "version": 0
+    "fullName": "string",
+    "email": "string"
 }
 ```
 
@@ -68,20 +45,8 @@ Actualiza un estudiante existente.
 **Request Body:**
 ```json
 {
-    "fullName": "María García Actualizada",
-    "email": "maria.garcia.updated@email.com"
-}
-```
-
-### POST /api/student/sync-from-supabase
-Sincroniza un estudiante desde Supabase.
-
-**Request Body:**
-```json
-{
-    "id": "a123b456-c789-0123-d456-e789f0123456",
-    "fullName": "Carlos Rodriguez",
-    "email": "carlos.rodriguez@email.com"
+    "fullName": "string",
+    "email": "string"
 }
 ```
 
@@ -96,8 +61,8 @@ Envía datos del estudiante a Gemini AI para generar un ejercicio personalizado.
 ```json
 {
     "id": "a123b456-c789-0123-d456-e789f0123456",
-    "fullName": "Ana López",
-    "email": "ana.lopez@email.com"
+    "fullName": "string",
+    "email": "string"
 }
 ```
 
@@ -105,7 +70,7 @@ Envía datos del estudiante a Gemini AI para generar un ejercicio personalizado.
 ```json
 {
     "exerciseId": "b234c567-d890-1234-e567-f890a1234567",
-    "exerciseContent": "Crear una clase Calculator con métodos para suma, resta, multiplicación y división..."
+    "exerciseContent": "string"
 }
 ```
 
@@ -122,17 +87,20 @@ Obtiene todos los ejercicios asignados a un estudiante por ID.
 **Response:**
 ```json
 [
-    {
-        "id": "b234c567-d890-1234-e567-f890a1234567",
-        "exerciseContent": "Crear una clase Calculator...",
-        "assignedDate": "2025-07-11T23:30:00",
-        "isCompleted": false,
-        "student": {
-            "id": "a123b456-c789-0123-d456-e789f0123456",
-            "fullName": "Ana López",
-            "email": "ana.lopez@email.com"
-        }
-    }
+  {
+    "exerciseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "exerciseContent": "string",
+    "assignedDate": "2025-07-29T21:41:55.820Z",
+    "student": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "fullName": "string",
+      "email": "string",
+      "exercises": [
+        "string"
+      ]
+    },
+    "isCompleted": true
+  }
 ]
 ```
 
@@ -144,23 +112,35 @@ Obtiene todos los ejercicios asignados a un estudiante por email.
 
 **Response:** *(Mismo formato que el endpoint anterior)*
 
-### GET /api/exercises/pending
-Obtiene todos los ejercicios pendientes (no completados).
+### POST /api/exercises/pending
+Obtiene todos los ejercicios pendientes (no completados) por estudiante.
+
+**Request Body:**
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "fullName": "string",
+  "email": "string"
+}
+```
 
 **Response:**
 ```json
 [
-    {
-        "id": "b234c567-d890-1234-e567-f890a1234567",
-        "exerciseContent": "Crear una clase Calculator...",
-        "assignedDate": "2025-07-11T23:30:00",
-        "isCompleted": false,
-        "student": {
-            "id": "a123b456-c789-0123-d456-e789f0123456",
-            "fullName": "Ana López",
-            "email": "ana.lopez@email.com"
-        }
-    }
+  {
+    "exerciseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "exerciseContent": "string",
+    "assignedDate": "2025-07-29T21:43:10.260Z",
+    "student": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "fullName": "string",
+      "email": "string",
+      "exercises": [
+        "string"
+      ]
+    },
+    "isCompleted": false
+  }
 ]
 ```
 
@@ -173,15 +153,18 @@ Marca un ejercicio como completado.
 **Response:**
 ```json
 {
-    "id": "b234c567-d890-1234-e567-f890a1234567",
-    "exerciseContent": "Crear una clase Calculator...",
-    "assignedDate": "2025-07-11T23:30:00",
-    "isCompleted": true,
-    "student": {
-        "id": "a123b456-c789-0123-d456-e789f0123456",
-        "fullName": "Ana López",
-        "email": "ana.lopez@email.com"
-    }
+  "exerciseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "exerciseContent": "string",
+  "assignedDate": "2025-07-29T21:45:16.140Z",
+  "student": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "fullName": "string",
+    "email": "string",
+    "exercises": [
+      "string"
+    ]
+  },
+  "isCompleted": true
 }
 ```
 
@@ -191,20 +174,48 @@ Obtiene un ejercicio específico por ID.
 **Path Parameters:**
 - `exerciseId`: UUID del ejercicio
 
+**Response:**
+```json
+{
+  "exerciseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "exerciseContent": "string",
+  "assignedDate": "2025-07-29T21:45:48.736Z",
+  "student": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "fullName": "string",
+    "email": "string",
+    "exercises": [
+      "string"
+    ]
+  },
+  "isCompleted": true
+}
+```
+
 ### GET /api/exercises/{exerciseId}/solutions
 Obtiene todas las soluciones de un ejercicio específico.
 
 **Path Parameters:**
 - `exerciseId`: UUID del ejercicio
 
-### GET /api/exercises/{exerciseId}/solutions/latest/student/{email}
-Obtiene la última solución de un estudiante para un ejercicio específico.
-
-**Path Parameters:**
-- `exerciseId`: UUID del ejercicio
-- `email`: Email del estudiante
-
----
+**Response:**
+```json
+[
+  {
+    "solutionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "code": "string",
+    "feedback": "string",
+    "grade": 0.1,
+    "submittedDate": "2025-07-29T21:37:34.855Z",
+    "evaluatedDate": "2025-07-29T21:37:34.855Z",
+    "exerciseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "exerciseContent": "string",
+    "studentName": "string",
+    "studentEmail": "string",
+    "isEvaluated": true
+  }
+]
+```
 
 ## 💻 Solution Management
 
@@ -214,13 +225,13 @@ Envía una solución de código Java. **Incluye validación automática con JDoo
 **Request Body:**
 ```json
 {
-    "exerciseId": "b234c567-d890-1234-e567-f890a1234567",
-    "studentEmail": "ana.lopez@email.com",
-    "code": "public class Calculator {\n    public int sum(int a, int b) {\n        return a + b;\n    }\n}"
+  "exerciseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "studentEmail": "string",
+  "code": "string"
 }
 ```
 
-**Response (Éxito):**
+**Response**
 ```json
 {
     "id": "c345d678-e901-2345-f678-901a2345b678",
