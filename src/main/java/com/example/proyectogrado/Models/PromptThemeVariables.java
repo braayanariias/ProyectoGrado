@@ -14,8 +14,6 @@ public class PromptThemeVariables {
             
             El ejercicio debe:
             
-            Incluir una historia breve o un contexto llamativo.
-            
             Pedir al estudiante que declare y use al menos tres variables de distintos tipos (por ejemplo: int, double, String).
             
             Involucrar operaciones simples como suma, concatenación o asignación.

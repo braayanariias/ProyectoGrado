@@ -50,7 +50,7 @@ public class ChatService {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
             return webClient.post()
-                    .uri("/gemini-2.0-flash:generateContent?key=" + API_KEY)
+                    .uri("/gemini-2.5-flash:generateContent?key=" + API_KEY)
                     .header("Content-Type", "application/json")
                     .bodyValue(requestBodyJson)
                     .retrieve()
@@ -88,7 +88,7 @@ public class ChatService {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
             return webClient.post()
-                    .uri("/gemini-2.0-flash:generateContent?key=" + API_KEY)
+                    .uri("/gemini-2.5-flash:generateContent?key=" + API_KEY)
                     .header("Content-Type", "application/json")
                     .bodyValue(requestBodyJson)
                     .retrieve()
@@ -142,7 +142,7 @@ public class ChatService {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
             String response = webClient.post()
-                    .uri("/gemini-2.0-flash:generateContent?key=" + API_KEY)
+                    .uri("/gemini-2.5-flash:generateContent?key=" + API_KEY)
                     .header("Content-Type", "application/json")
                     .bodyValue(requestBodyJson)
                     .retrieve()
