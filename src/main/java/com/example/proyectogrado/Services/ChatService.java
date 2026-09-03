@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +24,8 @@ public class ChatService {
     private final String API_KEY;
     private final ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
     private final ExerciseService exerciseService;
+    private final Duration geminiTimeout = Duration.ofSeconds(45);
+    private final int maxRetries = 2;
 
     public ChatService(
             WebClient.Builder webClientBuilder,
@@ -49,12 +54,7 @@ public class ChatService {
         try {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
-            return webClient.post()
-                    .uri("/gemini-2.5-flash:generateContent?key=" + API_KEY)
-                    .header("Content-Type", "application/json")
-                    .bodyValue(requestBodyJson)
-                    .retrieve()
-                    .bodyToMono(String.class)
+            return requestGemini(requestBodyJson)
                     .map(response -> {
                         String exerciseContent = extractMessage(response);
                         // Guardar el ejercicio en la base de datos relacionado con el estudiante
@@ -87,12 +87,7 @@ public class ChatService {
         try {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
 
-            return webClient.post()
-                    .uri("/gemini-2.5-flash:generateContent?key=" + API_KEY)
-                    .header("Content-Type", "application/json")
-                    .bodyValue(requestBodyJson)
-                    .retrieve()
-                    .bodyToMono(String.class)
+                    return requestGemini(requestBodyJson)
                     .map(response -> {
                         String exerciseContent = extractMessage(response);
                         // Guardar el ejercicio en la base de datos relacionado con el estudiante
@@ -105,6 +100,31 @@ public class ChatService {
         }
     }
 
+    private Mono<String> requestGemini(String requestBodyJson) {
+            return webClient.post()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/gemini-2.5-flash:generateContent")
+                    .queryParam("key", API_KEY)
+                    .build())
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBodyJson)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> response.bodyToMono(String.class)
+                    .defaultIfEmpty("sin detalles")
+                    .flatMap(body -> Mono.error(new GeminiApiException(
+                        response.statusCode().value(), body))))
+                .bodyToMono(String.class)
+                .timeout(geminiTimeout)
+                .retryWhen(Retry.backoff(maxRetries, Duration.ofSeconds(2))
+                    .filter(this::isTransientGeminiError)
+                    .onRetryExhaustedThrow((retrySpec, signal) -> signal.failure()));
+    }
+
+    private boolean isTransientGeminiError(Throwable error) {
+            return error instanceof GeminiApiException apiException
+                && (apiException.statusCode == 429 || apiException.statusCode >= 500);
+    }
+
     // Extrae el mensaje de la respuesta del modelo de IA
     private String extractMessage(String response) {
         try {
@@ -115,12 +135,35 @@ public class ChatService {
                 JsonNode content = firstCandidate.path("content");
                 JsonNode parts = content.path("parts");
                 if (parts.isArray() && !parts.isEmpty()) {
-                    return parts.get(0).path("text").asText();
+                    String text = parts.get(0).path("text").asText(null);
+                    if (text != null && !text.isBlank()) {
+                        return text;
+                    }
                 }
             }
-            return "No se pudo extraer la respuesta del modelo.";
+            String blockReason = rootNode.path("promptFeedback").path("blockReason").asText(null);
+            throw new GeminiApiException(200, blockReason == null
+                    ? "La respuesta de Gemini no contiene texto generado"
+                    : "Gemini bloqueó el prompt: " + blockReason);
         } catch (Exception e) {
-            return "Error al procesar la respuesta del modelo: " + e.getMessage();
+            if (e instanceof GeminiApiException) {
+                throw (GeminiApiException) e;
+            }
+            throw new GeminiApiException(200, "Respuesta inválida de Gemini: " + e.getMessage(), e);
+        }
+    }
+
+    private static class GeminiApiException extends RuntimeException {
+        private final int statusCode;
+
+        private GeminiApiException(int statusCode, String message) {
+            super(message);
+            this.statusCode = statusCode;
+        }
+
+        private GeminiApiException(int statusCode, String message, Throwable cause) {
+            super(message, cause);
+            this.statusCode = statusCode;
         }
     }
 
